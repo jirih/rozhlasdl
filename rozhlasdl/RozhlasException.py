@@ -1,0 +1,2 @@
+class RozhlasException(RuntimeError):
+    pass
