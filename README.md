@@ -37,7 +37,7 @@ optional arguments:
 Given urls must be valid rozhlas.cz pages.
 
 Directory for saving downloaded files can be an absolute or relative path.
-If the relative path is given, then the download will go to a subdirectory of a default `~/Downloads` directory.
+If the relative path is given, then the download will go to a subdirectory of a default download directory `~/Downloads`.
 
 Normally, the downloader first checks if the file has been already downloaded and skips the download, if the file (same
 name and same size) is already present. You can choose by the flag `-n` to download the file again and store it under
