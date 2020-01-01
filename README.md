@@ -1,5 +1,5 @@
 # rozhlasdl
-Downloader for rozhlas.cz
+######Downloader for rozhlas.cz
 
 ##Installation
 The software is developed in Python 3.8, so you should use it.
@@ -11,7 +11,7 @@ run: `python setup.py sdist bdist_wheel`
 install the wheel: `pip install dist/rozhlasdl-0.9.1-py3-none-any.whl`
 
 There will be a script in your 
-`Python/Scripts` directory. On Windows, you can find it at `C:\Program Files\Python38\Scripts\rozhlasdl.exe`.
+`Python/Scripts` directory. On Windows, you can find it as `C:\Program Files\Python38\Scripts\rozhlasdl.exe`.
 
 ##Usage
 Running
@@ -34,7 +34,7 @@ optional arguments:
   -n, --no-duplicate-skipping
                         Duplicates are not skipped
 ```
-Given urls must be valid rozhlas.cz pages
+Given urls must be valid rozhlas.cz pages.
 
 Directory for saving downloaded files can be an absolute or relative path.
 If the relative path is given, then the download will go to a subdirectory of a default `~/Downloads` directory.
