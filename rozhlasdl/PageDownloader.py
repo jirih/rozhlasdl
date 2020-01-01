@@ -1,3 +1,4 @@
+import contextlib
 import urllib.request
 
 
@@ -7,7 +8,7 @@ class PageDownloader():
 
     def download(self):
         req = urllib.request.Request(self.page_url)
-        with urllib.request.urlopen(req) as response:
+        with contextlib.closing(urllib.request.urlopen(req)) as response:
             charset = response.info().get_content_charset() or "utf-8"
             the_page = response.read().decode(charset)
         return the_page
