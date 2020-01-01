@@ -9,7 +9,8 @@ from RozhlasAudioArticlePageParser import RozhlasAudioArticlePageParser
 from RozhlasAudioSerialPageParser import RozhlasAudioSerialPageParser
 from RozhlasListPageParser import RozhlasListPageParser
 from WebPageParser import WebPageParser
-from utils import str_to_win_file_compatible, complete_url, add_folder_from_subdomain, makedirs
+from utils import str_to_win_file_compatible, complete_url, makedirs, get_subdomain, \
+    safe_path_join
 
 
 def get_audio_div(root):
@@ -90,17 +91,22 @@ class MainDownloader():
     def download_url(self, url):
         print()
         print("Web page: %s" % url)
+
+        subdomain = get_subdomain(url)
+        if subdomain == "prehravac" or subdomain == "hledani":
+            raise NotImplementedError("Subdomain %s is not supported yet." % subdomain)
+
         root = get_root_of_page(url)
 
         audio_div = get_audio_div(root)
         audio_type = get_audio_type(audio_div)
         if audio_type == "article":
-            folder = add_folder_from_subdomain(url, self.base_folder)
+            folder = safe_path_join(self.base_folder, subdomain)
             makedirs(folder)
             print("Audio type is article. Going to download its content, if available.")
             self.download_audio_article(audio_div, folder)
         elif audio_type == "serial":
-            folder = add_folder_from_subdomain(url, self.base_folder)
+            folder = safe_path_join(self.base_folder, subdomain)
             makedirs(folder)
             print("Audio type is serial. Going to download all available parts.")
             self.download_audio_serial(root, audio_div, folder)

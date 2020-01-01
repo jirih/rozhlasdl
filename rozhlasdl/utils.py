@@ -31,13 +31,15 @@ def complete_url(url, url_base):
     else:
         return url
 
-
-def add_folder_from_subdomain(url, folder):
+def get_subdomain(url):
     m = rozhlas_regex.search(url)
-    subdomain = m.group('subdomain')
-    if subdomain is not None:
-        folder = join(folder, subdomain.lower())
-    return folder
+    return m.group('subdomain')
+
+
+def safe_path_join(path, folder):
+    if folder is not None:
+        path = join(path, folder)
+    return path
 
 
 def makedirs(path):
