@@ -10,6 +10,8 @@ rozhlas_regex = re.compile(
 
 
 def str_to_win_file_compatible(s):
+    if s is None:
+        return "None"
     s = s.strip()
     s = s.replace("\\", ";")
     s = re.sub(r"[/|]", ";", s)
@@ -30,6 +32,7 @@ def complete_url(url, url_base):
                            parsed_url.query, parsed_url.fragment))
     else:
         return url
+
 
 def get_subdomain(url):
     m = rozhlas_regex.search(url)

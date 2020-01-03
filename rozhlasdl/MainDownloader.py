@@ -9,12 +9,13 @@ from RozhlasAudioArticlePageParser import RozhlasAudioArticlePageParser
 from RozhlasAudioSerialPageParser import RozhlasAudioSerialPageParser
 from RozhlasListPageParser import RozhlasListPageParser
 from WebPageParser import WebPageParser
+from qualifiedTags import *
 from utils import str_to_win_file_compatible, complete_url, makedirs, get_subdomain, \
     safe_path_join
 
 
 def get_audio_div(root):
-    for div in root.iter('{http://www.w3.org/1999/xhtml}div'):
+    for div in root.iter(DIV):
         if "id" in div.attrib:
             div_id = div.attrib["id"]
             if div_id == "file-serial-player":
@@ -73,6 +74,21 @@ class MainDownloader():
         mp3_url = page_parser.get_mp3_url()
         self.download_mp3(audio_title, folder, mp3_url)
 
+    def download_player(self, block_track_player_div, folder):
+
+        h3 = block_track_player_div.findall(".//%s" % H3)[0]
+        programme = str_to_win_file_compatible(h3.text)
+        folder = safe_path_join(folder, programme)
+        makedirs(folder)
+        p = block_track_player_div.findall(".//%s/../%s" % (H3, P))
+        mp3_name = str_to_win_file_compatible(p[0].text)
+        filename = mp3_name + ".mp3"
+        div_player_track = block_track_player_div.findall(".//%s[@id='player-track']" % DIV)
+        data_id = div_player_track[0].attrib["data-id"]
+        mp3_url = "https://media.rozhlas.cz/_audio/%s.mp3" % data_id
+        fd = FileDownloader(folder, progress_bar=MyProgressBar(), no_duplicates=self.no_duplicates)
+        fd.download(mp3_url, filename)
+
     def download_mp3(self, audio_title, folder, mp3_url):
         if audio_title is not None and mp3_url is not None:
             print(audio_title + ": " + mp3_url)
@@ -93,23 +109,37 @@ class MainDownloader():
         print("Web page: %s" % url)
 
         subdomain = get_subdomain(url)
-        if subdomain == "prehravac" or subdomain == "hledani":
+        if subdomain == "hledani":
             raise NotImplementedError("Subdomain %s is not supported yet." % subdomain)
 
         root = get_root_of_page(url)
 
-        audio_div = get_audio_div(root)
-        audio_type = get_audio_type(audio_div)
-        if audio_type == "article":
+        if subdomain == "prehravac":
+            block_track_player_div = root.findall(".//%s[@id='block-track-player']" % DIV)[0]
+            body = root.findall(".//%s" % BODY)[0]
+            body_id = body.attrib["id"]
+            station = body_id.split('-')[-1]
+
             folder = safe_path_join(self.base_folder, subdomain)
+            folder = safe_path_join(folder, station)
             makedirs(folder)
+
             print("Audio type is article. Going to download its content, if available.")
-            self.download_audio_article(audio_div, folder)
-        elif audio_type == "serial":
-            folder = safe_path_join(self.base_folder, subdomain)
-            makedirs(folder)
-            print("Audio type is serial. Going to download all available parts.")
-            self.download_audio_serial(root, audio_div, folder)
+            self.download_player(block_track_player_div, folder)
+
         else:
-            print("Audio type not recognized. Trying to find links to pages with media.")
-            self.download_links(root, url)
+            audio_div = get_audio_div(root)
+            audio_type = get_audio_type(audio_div)
+            if audio_type == "article":
+                folder = safe_path_join(self.base_folder, subdomain)
+                makedirs(folder)
+                print("Audio type is article. Going to download its content, if available.")
+                self.download_audio_article(audio_div, folder)
+            elif audio_type == "serial":
+                folder = safe_path_join(self.base_folder, subdomain)
+                makedirs(folder)
+                print("Audio type is serial. Going to download all available parts.")
+                self.download_audio_serial(root, audio_div, folder)
+            else:
+                print("Audio type not recognized. Trying to find links to pages with media.")
+                self.download_links(root, url)
