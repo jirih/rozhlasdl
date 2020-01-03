@@ -57,8 +57,6 @@ class MainDownloader():
         mp3_urls_and_audio_titles = page_parser.get_mp3_urls_and_audio_titles()
         serial_name = page_parser.get_serial_name()
         serial_folder = join(folder, str_to_win_file_compatible(serial_name))
-        if not isdir(serial_folder):
-            mkdir(serial_folder)
 
         for mp3_url, audio_title in mp3_urls_and_audio_titles:
             self.download_mp3(audio_title, serial_folder, mp3_url)
