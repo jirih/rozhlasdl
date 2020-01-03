@@ -21,6 +21,8 @@ def create_parser():
                         dest="no_duplicate_skipping", default=False, action='store_true')
     parser.add_argument('-f', '--follow-next-pages', help='Follow next pages',
                         dest="follow_next_pages", default=False, action='store_true')
+    parser.add_argument('-m', '--max-next-pages', help='Maximal number of next pages to follow',
+                        dest="max_next_pages", default=3, action='store')
     parser.add_argument('-s', '--simulate-audio-download', help='Downloads of audio files will be faked',
                         dest="fake_download", default=False, action='store_true')
     return parser
@@ -33,13 +35,14 @@ def main():
     no_duplicates = not parser.parse_args().no_duplicate_skipping
     follow_next_pages = parser.parse_args().follow_next_pages
     fake_download = parser.parse_args().fake_download
+    max_next_pages = parser.parse_args().max_next_pages
 
     if not isabs(folder):
         folder = join(str(Path.home()), "Downloads", folder)
     makedirs(folder)
 
     main_downloader = MainDownloader(folder, no_duplicates=no_duplicates, follow_next_pages=follow_next_pages,
-                                     fake_download=fake_download)
+                                     fake_download=fake_download, max_next_pages=max_next_pages)
     for url in urls:
         if validate_url(url):
             # noinspection PyBroadException

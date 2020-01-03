@@ -35,9 +35,10 @@ optional arguments:
                         Duplicates are not skipped
   -f, --follow-next-pages
                         Follow next pages
+  -m MAX_NEXT_PAGES, --max-next-pages MAX_NEXT_PAGES
+                        Maximal number of next pages to follow
   -s, --simulate-audio-download
                         Downloads of audio files will be faked
-
 ```
 Given urls must be valid rozhlas.cz pages.
 

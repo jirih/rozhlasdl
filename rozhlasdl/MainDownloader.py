@@ -49,11 +49,12 @@ def get_root_of_page(url):
 
 
 class MainDownloader():
-    def __init__(self, base_folder, no_duplicates=True, follow_next_pages=False, fake_download=False):
+    def __init__(self, base_folder, no_duplicates=True, follow_next_pages=False, fake_download=False, max_next_pages=3):
         self.base_folder = base_folder
         self.no_duplicates = no_duplicates
         self.follow_next_pages = follow_next_pages
         self.fake_download = fake_download
+        self.max_next_pages = max_next_pages
 
     def download_audio_serial(self, root, audio_div, folder):
         page_parser = RozhlasAudioSerialPageParser(root, audio_div)
@@ -109,6 +110,11 @@ class MainDownloader():
             if len(ul_pagers) == 0:
                 return
             ul_pager = ul_pagers[0]
+            next_page_number = int(
+                find_elements_with_attribute_containing(ul_pager, LI, "class", "pager__item--current")[0].text) + 1
+            if next_page_number > self.max_next_pages:
+                print("Maximal number of pages to follow reached.")
+                return
 
             li_pager_item_next = find_elements_with_attribute_containing(ul_pager, LI, "class", "pager__item--next")
             if len(li_pager_item_next) == 0:
@@ -116,10 +122,8 @@ class MainDownloader():
             a_link_to_next = li_pager_item_next[0].findall(".//%s[@href]" % A)
             if len(a_link_to_next) == 0:
                 return
-            next_page_number = int(
-                find_elements_with_attribute_containing(ul_pager, LI, "class", "pager__item--current")[0].text) + 1
 
-            print("Following next page (%d)" % next_page_number)
+            print("Following next page (%d)." % next_page_number)
             self.download_url(complete_url(a_link_to_next[0].attrib["href"], base_url))
 
     def download_url(self, url):
