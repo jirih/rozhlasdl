@@ -113,8 +113,12 @@ class MainDownloader():
         root = get_root_of_page(url)
 
         if subdomain == "prehravac":
-            block_track_player_div = root.findall(".//%s[@id='block-track-player']" % DIV)[0]
             body = root.findall(".//%s" % BODY)[0]
+            if "mode-live" in body.attrib["class"]:
+                raise NotImplementedError("Live mode not supported.")
+
+            block_track_player_div = root.findall(".//%s[@id='block-track-player']" % DIV)[0]
+
             body_id = body.attrib["id"]
             station = body_id.split('-')[-1]
 
