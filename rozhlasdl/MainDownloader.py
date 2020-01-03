@@ -111,9 +111,8 @@ class MainDownloader():
                 return
             ul_pager = ul_pagers[0]
             current_page_number = int(
-                find_elements_with_attribute_containing(ul_pager, LI, "class", "pager__item--current")[0].text) + 1
-            print("current_page_number: %d" % current_page_number)
-            if current_page_number-1 > self.max_next_pages:
+                find_elements_with_attribute_containing(ul_pager, LI, "class", "pager__item--current")[0].text)
+            if current_page_number > self.max_next_pages:
                 print("Maximal number of pages to follow reached.")
                 return
 
