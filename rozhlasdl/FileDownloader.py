@@ -5,6 +5,7 @@ from urllib.parse import urlparse
 from urllib.request import Request, urlopen, urlretrieve
 
 from RozhlasException import RozhlasException
+from utils import makedirs
 
 
 def create_path_with_index(path, index):
@@ -30,10 +31,11 @@ class FileDownloader:
     def __init__(self, folder=str(Path.home()), progress_bar=None, no_duplicates=True):
         self.progress_bar = progress_bar
         self.no_duplicates = no_duplicates
-        if os.path.isdir(folder):
-            self.folder = folder
-        else:
-            raise RozhlasException("Folder %s does not exist" % folder)
+        self.folder = folder
+
+        if not os.path.isdir(folder):
+            print("Path %s does not exist. Creating." % self.folder)
+            makedirs(folder)
 
     def download(self, url, name=None):
         if name is None:

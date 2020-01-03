@@ -1,5 +1,4 @@
 import re
-from os import mkdir
 from os.path import join, isdir
 
 from FileDownloader import FileDownloader
@@ -10,7 +9,7 @@ from RozhlasAudioSerialPageParser import RozhlasAudioSerialPageParser
 from RozhlasListPageParser import RozhlasListPageParser
 from WebPageParser import WebPageParser
 from qualifiedTags import *
-from utils import str_to_win_file_compatible, complete_url, makedirs, get_subdomain, \
+from utils import str_to_win_file_compatible, complete_url, get_subdomain, \
     safe_path_join
 
 
@@ -79,7 +78,6 @@ class MainDownloader():
         h3 = block_track_player_div.findall(".//%s" % H3)[0]
         programme = str_to_win_file_compatible(h3.text)
         folder = safe_path_join(folder, programme)
-        makedirs(folder)
         p = block_track_player_div.findall(".//%s/../%s" % (H3, P))
         mp3_name = str_to_win_file_compatible(p[0].text)
         filename = mp3_name + ".mp3"
@@ -122,9 +120,8 @@ class MainDownloader():
 
             folder = safe_path_join(self.base_folder, subdomain)
             folder = safe_path_join(folder, station)
-            makedirs(folder)
 
-            print("Audio type is article. Going to download its content, if available.")
+            print("A player web page. Going to download its content, if available.")
             self.download_player(block_track_player_div, folder)
 
         else:
@@ -132,12 +129,10 @@ class MainDownloader():
             audio_type = get_audio_type(audio_div)
             if audio_type == "article":
                 folder = safe_path_join(self.base_folder, subdomain)
-                makedirs(folder)
                 print("Audio type is article. Going to download its content, if available.")
                 self.download_audio_article(audio_div, folder)
             elif audio_type == "serial":
                 folder = safe_path_join(self.base_folder, subdomain)
-                makedirs(folder)
                 print("Audio type is serial. Going to download all available parts.")
                 self.download_audio_serial(root, audio_div, folder)
             else:
