@@ -1,7 +1,7 @@
 # rozhlasdl
-######Downloader for rozhlas.cz
+###### Downloader for rozhlas.cz
 
-##Installation
+## Installation
 The software is developed in Python 3.8, so you should use it.
 
 Clone the repo and go to its root directory.
@@ -13,7 +13,7 @@ install the wheel: `pip install dist/rozhlasdl-0.9.1-py3-none-any.whl`
 There will be a script in your 
 `Python/Scripts` directory. On Windows, you can find it as `C:\Program Files\Python38\Scripts\rozhlasdl.exe`.
 
-##Usage
+## Usage
 Running
 `python rozhlasdl/rozhlasdl.py -h`
 or on Windows:
@@ -43,7 +43,7 @@ Normally, the downloader first checks if the file has been already downloaded an
 name and same size) is already present. You can choose by the flag `-n` to download the file again and store it under
 a name with an index number.
 
-###Example
+### Example
 
 The command
 
