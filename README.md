@@ -21,7 +21,7 @@ or on Windows:
 you will get:
 
 ```
-usage: rozhlasdl.py [-h] [-d DIR] [-n] url [url ...]
+usage: rozhlasdl.py [-h] [-d DIR] [-n] [-f] [-s] url [url ...]
 
 Download mp3 from rozhlas.cz urls
 
@@ -33,6 +33,11 @@ optional arguments:
   -d DIR, --dir DIR     Directory for saving downloaded files
   -n, --no-duplicate-skipping
                         Duplicates are not skipped
+  -f, --follow-next-pages
+                        Follow next pages
+  -s, --simulate-audio-download
+                        Downloads of audio files will be faked
+
 ```
 Given urls must be valid rozhlas.cz pages.
 

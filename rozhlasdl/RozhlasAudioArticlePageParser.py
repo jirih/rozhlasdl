@@ -2,7 +2,8 @@ import re
 
 
 class RozhlasAudioArticlePageParser:
-    pattern = re.compile("https://.*rozhlas.cz/.*/[0-9a-f]{8}([0-9a-f]{24})?\\.mp3(\\?.*)?")
+    # pattern = re.compile("https://.*rozhlas.cz/.*/[0-9a-f]{8}([0-9a-f]{24})?\\.mp3(\\?.*)?")
+    pattern = re.compile("https://.*rozhlas.cz/.*\\.mp3(\\?.*)?")
 
     def __init__(self, root):
         self.root = root

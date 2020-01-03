@@ -48,3 +48,15 @@ def safe_path_join(path, folder):
 def makedirs(path):
     if not os.path.exists(path):
         os.makedirs(path)
+
+
+def find_elements_with_attribute_containing(root, tag, attribute, content):
+    result = []
+    if attribute in root.attrib:
+        if content in root.attrib[attribute]:
+            result.append(root)
+
+    elements = root.findall(".//%s[@%s]" % (tag, attribute))
+    elements = filter(lambda x: content in x.attrib[attribute], elements)
+    result.extend(elements)
+    return result

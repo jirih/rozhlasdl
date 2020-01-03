@@ -4,7 +4,6 @@ from pathlib import Path
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen, urlretrieve
 
-from RozhlasException import RozhlasException
 from utils import makedirs
 
 
@@ -28,10 +27,11 @@ def get_size_of_file_on_web(url):
 
 
 class FileDownloader:
-    def __init__(self, folder=str(Path.home()), progress_bar=None, no_duplicates=True):
+    def __init__(self, folder=str(Path.home()), progress_bar=None, no_duplicates=True, fake_download=False):
         self.progress_bar = progress_bar
         self.no_duplicates = no_duplicates
         self.folder = folder
+        self.fake_download = fake_download
 
         if not os.path.isdir(folder):
             print("Path %s does not exist. Creating." % self.folder)
@@ -58,4 +58,7 @@ class FileDownloader:
                 path = add_index_to_path(path, 1)
 
         print("Downloading %s" % path)
-        urlretrieve(url, path, self.progress_bar)
+        if self.fake_download:
+            print("100% |########################################################################|")
+        else:
+            urlretrieve(url, path, self.progress_bar)

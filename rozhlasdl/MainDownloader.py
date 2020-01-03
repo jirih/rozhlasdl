@@ -1,16 +1,18 @@
 import re
-from os.path import join, isdir
+from os.path import join
 
 from FileDownloader import FileDownloader
 from MyProgressBar import MyProgressBar
 from PageDownloader import PageDownloader
 from RozhlasAudioArticlePageParser import RozhlasAudioArticlePageParser
 from RozhlasAudioSerialPageParser import RozhlasAudioSerialPageParser
+from RozhlasException import RozhlasException
 from RozhlasListPageParser import RozhlasListPageParser
+from RozhlasPlayerPageParser import RozhlasPlayerPageParser
 from WebPageParser import WebPageParser
 from qualifiedTags import *
 from utils import str_to_win_file_compatible, complete_url, get_subdomain, \
-    safe_path_join
+    safe_path_join, find_elements_with_attribute_containing
 
 
 def get_audio_div(root):
@@ -47,9 +49,11 @@ def get_root_of_page(url):
 
 
 class MainDownloader():
-    def __init__(self, base_folder, no_duplicates=True):
+    def __init__(self, base_folder, no_duplicates=True, follow_next_pages=False, fake_download=False):
         self.base_folder = base_folder
         self.no_duplicates = no_duplicates
+        self.follow_next_pages = follow_next_pages
+        self.fake_download = fake_download
 
     def download_audio_serial(self, root, audio_div, folder):
         page_parser = RozhlasAudioSerialPageParser(root, audio_div)
@@ -72,26 +76,24 @@ class MainDownloader():
         self.download_mp3(audio_title, folder, mp3_url)
 
     def download_player(self, block_track_player_div, folder):
+        page_parser = RozhlasPlayerPageParser(block_track_player_div)
 
-        h3 = block_track_player_div.findall(".//%s" % H3)[0]
-        programme = str_to_win_file_compatible(h3.text)
-        folder = safe_path_join(folder, programme)
-        p = block_track_player_div.findall(".//%s/../%s" % (H3, P))
-        mp3_name = str_to_win_file_compatible(p[0].text)
-        filename = mp3_name + ".mp3"
-        div_player_track = block_track_player_div.findall(".//%s[@id='player-track']" % DIV)
-        data_id = div_player_track[0].attrib["data-id"]
-        mp3_url = "https://media.rozhlas.cz/_audio/%s.mp3" % data_id
-        fd = FileDownloader(folder, progress_bar=MyProgressBar(), no_duplicates=self.no_duplicates)
-        fd.download(mp3_url, filename)
+        audio_title = page_parser.get_audio_title()
+        programme = page_parser.get_programme()
+        mp3_url = page_parser.get_mp3_url()
+
+        self.download_mp3(audio_title, safe_path_join(folder, programme), mp3_url)
 
     def download_mp3(self, audio_title, folder, mp3_url):
+        if mp3_url is None:
+            raise RozhlasException("MP3 URL not given! Probably problem with parsing.")
         if audio_title is not None and mp3_url is not None:
             print(audio_title + ": " + mp3_url)
             filename = str_to_win_file_compatible(audio_title) + ".mp3"
         else:
             filename = None
-        fd = FileDownloader(folder, progress_bar=MyProgressBar(), no_duplicates=self.no_duplicates)
+        fd = FileDownloader(folder, progress_bar=MyProgressBar(), no_duplicates=self.no_duplicates,
+                            fake_download=self.fake_download)
         fd.download(mp3_url, filename)
 
     def download_links(self, root, base_url):
@@ -99,6 +101,26 @@ class MainDownloader():
         links = page_parser.get_links()
         for link in links:
             self.download_url(complete_url(link, base_url))
+
+        print("All links found on %s has been processed." % base_url)
+
+        if self.follow_next_pages:
+            ul_pagers = root.findall(".//%s[@class='pager']" % UL)
+            if len(ul_pagers) == 0:
+                return
+            ul_pager = ul_pagers[0]
+
+            li_pager_item_next = find_elements_with_attribute_containing(ul_pager, LI, "class", "pager__item--next")
+            if len(li_pager_item_next) == 0:
+                return
+            a_link_to_next = li_pager_item_next[0].findall(".//%s[@href]" % A)
+            if len(a_link_to_next) == 0:
+                return
+            next_page_number = int(
+                find_elements_with_attribute_containing(ul_pager, LI, "class", "pager__item--current")[0].text) + 1
+
+            print("Following next page (%d)" % next_page_number)
+            self.download_url(complete_url(a_link_to_next[0].attrib["href"], base_url))
 
     def download_url(self, url):
         print()
