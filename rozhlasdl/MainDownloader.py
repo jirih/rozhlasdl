@@ -110,9 +110,10 @@ class MainDownloader():
             if len(ul_pagers) == 0:
                 return
             ul_pager = ul_pagers[0]
-            next_page_number = int(
+            current_page_number = int(
                 find_elements_with_attribute_containing(ul_pager, LI, "class", "pager__item--current")[0].text) + 1
-            if next_page_number > self.max_next_pages:
+            print("current_page_number: %d" % current_page_number)
+            if current_page_number-1 > self.max_next_pages:
                 print("Maximal number of pages to follow reached.")
                 return
 
@@ -123,7 +124,7 @@ class MainDownloader():
             if len(a_link_to_next) == 0:
                 return
 
-            print("Following next page (%d)." % next_page_number)
+            print("Following next page (%d)." % (current_page_number+1))
             self.download_url(complete_url(a_link_to_next[0].attrib["href"], base_url))
 
     def download_url(self, url):

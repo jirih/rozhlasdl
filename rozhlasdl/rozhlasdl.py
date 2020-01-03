@@ -35,7 +35,7 @@ def main():
     no_duplicates = not parser.parse_args().no_duplicate_skipping
     follow_next_pages = parser.parse_args().follow_next_pages
     fake_download = parser.parse_args().fake_download
-    max_next_pages = parser.parse_args().max_next_pages
+    max_next_pages = int(parser.parse_args().max_next_pages)
 
     if not isabs(folder):
         folder = join(str(Path.home()), "Downloads", folder)
