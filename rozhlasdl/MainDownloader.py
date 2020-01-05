@@ -89,7 +89,7 @@ class MainDownloader():
         if mp3_url is None:
             raise RozhlasException("MP3 URL not given! Probably problem with parsing.")
         if audio_title is not None and mp3_url is not None:
-            print(audio_title + ": " + mp3_url)
+            print("%s: %s" % (audio_title, mp3_url))
             filename = str_to_win_file_compatible(audio_title) + ".mp3"
         else:
             filename = None
@@ -123,7 +123,7 @@ class MainDownloader():
             if len(a_link_to_next) == 0:
                 return
 
-            print("Following next page (%d)." % (current_page_number+1))
+            print("Following next page (%d)." % (current_page_number + 1))
             self.download_url(complete_url(a_link_to_next[0].attrib["href"], base_url))
 
     def download_url(self, url):
