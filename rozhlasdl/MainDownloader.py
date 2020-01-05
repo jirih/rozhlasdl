@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import re
 from os.path import join
 
@@ -89,6 +90,7 @@ class MainDownloader():
         if mp3_url is None:
             raise RozhlasException("MP3 URL not given! Probably problem with parsing.")
         if audio_title is not None and mp3_url is not None:
+
             print("%s: %s" % (audio_title, mp3_url))
             filename = str_to_win_file_compatible(audio_title) + ".mp3"
         else:

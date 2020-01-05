@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from qualifiedTags import DIV, H3, P
 from utils import str_to_win_file_compatible
 

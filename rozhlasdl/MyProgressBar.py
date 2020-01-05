@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from progressbar.progressbar import ProgressBar
 
 

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import re
 
 pattern = re.compile("https://.*rozhlas.cz/.*/[0-9a-f]{32}\\.mp3(\\?.*)?")

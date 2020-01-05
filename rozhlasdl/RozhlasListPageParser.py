@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 class RozhlasListPageParser:
     def __init__(self, root):
         self.root = root

@@ -1,4 +1,6 @@
+# -*- coding: utf-8 -*-
 import argparse
+import sys
 import traceback
 from datetime import datetime
 from os.path import isabs
@@ -54,6 +56,8 @@ def main():
                 main_downloader.download_url(url)
             except Exception as ex:
                 traceback.print_exc()
+            sys.stdout.flush()
+            sys.stderr.flush()
         else:
             print("%s is not a valid url" % url)
 
