@@ -1,5 +1,6 @@
 import argparse
 import traceback
+from datetime import datetime
 from os.path import isabs
 from os.path import join
 from pathlib import Path
@@ -43,6 +44,9 @@ def main():
 
     main_downloader = MainDownloader(folder, no_duplicates=no_duplicates, follow_next_pages=follow_next_pages,
                                      fake_download=fake_download, max_next_pages=max_next_pages)
+
+    print("Download started: %s" % datetime.now())
+
     for url in urls:
         if validate_url(url):
             # noinspection PyBroadException
@@ -53,6 +57,8 @@ def main():
         else:
             print("%s is not a valid url" % url)
 
+    print("Download finished: %s" % datetime.now())
+    print()
 
 if __name__ == "__main__":
     main()
