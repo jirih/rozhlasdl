@@ -29,7 +29,7 @@ positional arguments:
   url                   <Required> URLs
 
 optional arguments:
-  -h, --help            show this help message and exit
+  -h, --help            Show this help message and exit
   -d DIR, --dir DIR     Directory for saving downloaded files
   -n, --no-duplicate-skipping
                         Duplicates are not skipped
