@@ -22,7 +22,7 @@ setup(
             'rozhlasdl = rozhlasdl.rozhlasdl:main'
         ]
     }, install_requires=[
-        'html5lib', 'progressbar',
+        'html5lib', 'progressbar', 'retry'
     ],
 
 )

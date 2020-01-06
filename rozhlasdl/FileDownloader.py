@@ -2,8 +2,11 @@
 import contextlib
 import os
 from pathlib import Path
+from urllib.error import HTTPError, ContentTooShortError
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen, urlretrieve
+
+from retry import retry
 
 from utils import makedirs, safe_print
 
@@ -22,9 +25,14 @@ def add_index_to_path(path, index):
 
 
 def get_size_of_file_on_web(url):
-    with contextlib.closing(urlopen(Request(url, method='HEAD'))) as head_resp:
+    with contextlib.closing(open_url_head(url)) as head_resp:
         content_length = int(head_resp.info()["Content-Length"])
     return content_length
+
+
+@retry(HTTPError, tries=3, delay=5, backoff=2)
+def open_url_head(url):
+    return urlopen(Request(url, method='HEAD'))
 
 
 class FileDownloader:
@@ -50,7 +58,8 @@ class FileDownloader:
             if self.no_duplicates:
                 existing_file_length = os.path.getsize(path)
                 if content_length != existing_file_length:
-                    safe_print("File %s already exists but has different length. New version will be downloaded." % path)
+                    safe_print(
+                        "File %s already exists but has different length. New version will be downloaded." % path)
                     path = add_index_to_path(path, 1)
                 else:
                     safe_print("File %s already exists. Skipping." % path)
@@ -62,4 +71,8 @@ class FileDownloader:
         if self.fake_download:
             print("100% |########################################################################|")
         else:
-            urlretrieve(url, path, self.progress_bar)
+            self.url_download(path, url)
+
+    @retry((HTTPError, ContentTooShortError), tries=3, delay=5, backoff=2)
+    def url_download(self, path, url):
+        urlretrieve(url, path, self.progress_bar)
