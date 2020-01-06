@@ -40,6 +40,8 @@ optional arguments:
   -s, --simulate-audio-download
                         Downloads of audio files will be faked
   -u, --utf-8           Explicitly set UTF-8 for stdin, stdout, stderr - against problems when piping
+  -p, --progress-bar-disabled
+                        Disable progress-bar
 ```
 Given urls must be valid rozhlas.cz pages.
 
