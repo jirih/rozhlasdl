@@ -50,12 +50,14 @@ def get_root_of_page(url):
 
 
 class MainDownloader():
-    def __init__(self, base_folder, no_duplicates=True, follow_next_pages=False, fake_download=False, max_next_pages=3):
+    def __init__(self, base_folder, no_duplicates=True, follow_next_pages=False, fake_download=False, max_next_pages=3,
+                 progress_bar_enabled=True):
         self.base_folder = base_folder
         self.no_duplicates = no_duplicates
         self.follow_next_pages = follow_next_pages
         self.fake_download = fake_download
         self.max_next_pages = max_next_pages
+        self.progress_bar_enabled = progress_bar_enabled
 
     def download_audio_serial(self, root, audio_div, folder):
         page_parser = RozhlasAudioSerialPageParser(root, audio_div)
@@ -95,7 +97,7 @@ class MainDownloader():
             filename = str_to_win_file_compatible(audio_title) + ".mp3"
         else:
             filename = None
-        fd = FileDownloader(folder, progress_bar=MyProgressBar(), no_duplicates=self.no_duplicates,
+        fd = FileDownloader(folder, progress_bar=MyProgressBar() if self.progress_bar_enabled else None, no_duplicates=self.no_duplicates,
                             fake_download=self.fake_download)
         fd.download(mp3_url, filename)
 

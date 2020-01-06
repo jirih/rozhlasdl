@@ -69,9 +69,14 @@ class FileDownloader:
 
         print("Downloading %s" % path)
         if self.fake_download:
-            print("100% |########################################################################|")
+            if self.progress_bar is None:
+                print("Download done.")
+            else:
+                print("100% |########################################################################|")
         else:
             self.url_download(path, url)
+            if self.progress_bar is None:
+                print("Download done.")
 
     @retry((HTTPError, ContentTooShortError), tries=3, delay=5, backoff=2)
     def url_download(self, path, url):

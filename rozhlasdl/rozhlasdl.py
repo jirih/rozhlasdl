@@ -31,6 +31,8 @@ def create_parser():
     parser.add_argument('-u', '--utf-8',
                         help='Explicitly set UTF-8 for stdin, stdout, stderr - against problems when piping',
                         dest="utf8", default=False, action='store_true')
+    parser.add_argument('-p', '--progress-bar-disabled', help='Disable progress-bar',
+                        dest="progress_bar_enabled", default=True, action='store_false')
     return parser
 
 
@@ -46,13 +48,15 @@ def main():
     follow_next_pages = parser.parse_args().follow_next_pages
     fake_download = parser.parse_args().fake_download
     max_next_pages = int(parser.parse_args().max_next_pages)
+    progress_bar_enabled = parser.parse_args().progress_bar_enabled
 
     if not isabs(folder):
         folder = join(str(Path.home()), "Downloads", folder)
     makedirs(folder)
 
     main_downloader = MainDownloader(folder, no_duplicates=no_duplicates, follow_next_pages=follow_next_pages,
-                                     fake_download=fake_download, max_next_pages=max_next_pages)
+                                     fake_download=fake_download, max_next_pages=max_next_pages,
+                                     progress_bar_enabled=progress_bar_enabled)
 
     print("Download started: %s" % datetime.now())
 
