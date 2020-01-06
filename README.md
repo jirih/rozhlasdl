@@ -13,6 +13,8 @@ install the wheel: `pip install dist/rozhlasdl-0.9.1-py3-none-any.whl`
 There will be a script in your 
 `Python/Scripts` directory. On Windows, you can find it as `C:\Program Files\Python38\Scripts\rozhlasdl.exe`.
 
+Note, that you can find a Windows binary at https://github.com/jirih/rozhlasdl-exe.
+
 ## Usage
 Running
 `python rozhlasdl/rozhlasdl.py -h`
