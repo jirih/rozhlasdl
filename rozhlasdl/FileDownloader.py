@@ -5,7 +5,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen, urlretrieve
 
-from utils import makedirs
+from utils import makedirs, safe_print
 
 
 def create_path_with_index(path, index):
@@ -50,10 +50,10 @@ class FileDownloader:
             if self.no_duplicates:
                 existing_file_length = os.path.getsize(path)
                 if content_length != existing_file_length:
-                    print("File %s already exists but has different length. New version will be downloaded." % path)
+                    safe_print("File %s already exists but has different length. New version will be downloaded." % path)
                     path = add_index_to_path(path, 1)
                 else:
-                    print("File %s already exists. Skipping." % path)
+                    safe_print("File %s already exists. Skipping." % path)
                     return
             else:
                 path = add_index_to_path(path, 1)

@@ -2,7 +2,7 @@
 import os
 import re
 from os.path import join
-from urllib.parse import urlparse, urlunparse
+from urllib.parse import urlparse, urlunparse, quote
 
 rozhlas_regex = re.compile(
     r'https://'
@@ -61,3 +61,10 @@ def find_elements_with_attribute_containing(root, tag, attribute, content):
     elements = filter(lambda x: content in x.attrib[attribute], elements)
     result.extend(elements)
     return result
+
+
+def safe_print(s):
+    try:
+        print(s)
+    except UnicodeEncodeError:
+        print(quote(s))

@@ -39,6 +39,7 @@ optional arguments:
                         Maximal number of next pages to follow
   -s, --simulate-audio-download
                         Downloads of audio files will be faked
+  -u, --utf-8           Explicitly set UTF-8 for stdin, stdout, stderr - against problems when piping
 ```
 Given urls must be valid rozhlas.cz pages.
 

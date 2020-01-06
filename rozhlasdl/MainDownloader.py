@@ -13,7 +13,7 @@ from RozhlasPlayerPageParser import RozhlasPlayerPageParser
 from WebPageParser import WebPageParser
 from qualifiedTags import *
 from utils import str_to_win_file_compatible, complete_url, get_subdomain, \
-    safe_path_join, find_elements_with_attribute_containing
+    safe_path_join, find_elements_with_attribute_containing, safe_print
 
 
 def get_audio_div(root):
@@ -91,7 +91,7 @@ class MainDownloader():
             raise RozhlasException("MP3 URL not given! Probably problem with parsing.")
         if audio_title is not None and mp3_url is not None:
 
-            print("%s: %s" % (audio_title, mp3_url))
+            safe_print("%s: %s" % (audio_title, mp3_url))
             filename = str_to_win_file_compatible(audio_title) + ".mp3"
         else:
             filename = None
