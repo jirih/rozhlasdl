@@ -69,15 +69,27 @@ class MainDownloader():
         for mp3_url, audio_title in mp3_urls_and_audio_titles:
             self.download_mp3(audio_title, serial_folder, mp3_url)
 
-    def download_audio_article(self, audio_div, folder):
-        page_parser = RozhlasAudioArticlePageParser(audio_div)
+    def download_audio_article(self, root, audio_div, folder):
+        page_parser = RozhlasAudioArticlePageParser(root, audio_div)
 
         audio_title = page_parser.get_audio_title()
         if page_parser.is_copyright_expired():
-            print("%s: Copyright expired" % audio_title)
+            print("%s: Copyright expired." % audio_title)
             return
         mp3_url = page_parser.get_mp3_url()
+
+        if page_parser.has_other_parts():
+            print("%s: More parts detected." % audio_title)
+            serial_name = page_parser.get_serial_name()
+            folder = join(folder, str_to_win_file_compatible(serial_name))
+
         self.download_mp3(audio_title, folder, mp3_url)
+
+        if page_parser.has_other_parts():
+            mp3_urls_and_audio_titles_of_other_parts = page_parser.get_mp3_urls_and_audio_titles_of_other_parts()
+            for mp3_url, audio_title in mp3_urls_and_audio_titles_of_other_parts:
+                print("%s: %s " % ( audio_title, mp3_url))
+                self.download_mp3(audio_title, folder, mp3_url)
 
     def download_player(self, block_track_player_div, folder):
         page_parser = RozhlasPlayerPageParser(block_track_player_div)
@@ -97,8 +109,8 @@ class MainDownloader():
             filename = str_to_win_file_compatible(audio_title) + ".mp3"
         else:
             filename = None
-        fd = FileDownloader(folder, progress_bar=MyProgressBar() if self.progress_bar_enabled else None, no_duplicates=self.no_duplicates,
-                            fake_download=self.fake_download)
+        fd = FileDownloader(folder, progress_bar=MyProgressBar() if self.progress_bar_enabled else None,
+                            no_duplicates=self.no_duplicates, fake_download=self.fake_download)
         fd.download(mp3_url, filename)
 
     def download_links(self, root, base_url):
@@ -162,7 +174,7 @@ class MainDownloader():
             if audio_type == "article":
                 folder = safe_path_join(self.base_folder, subdomain)
                 print("Audio type is article. Going to download its content, if available.")
-                self.download_audio_article(audio_div, folder)
+                self.download_audio_article(root, audio_div, folder)
             elif audio_type == "serial":
                 folder = safe_path_join(self.base_folder, subdomain)
                 print("Audio type is serial. Going to download all available parts.")
