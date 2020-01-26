@@ -9,6 +9,8 @@ rozhlas_regex = re.compile(
     r'((?P<subdomain>\w+)\.)?'
     r'rozhlas.cz/.*', re.IGNORECASE)
 
+MAX_FILENAME_LENGTH = 240
+
 
 def str_to_win_file_compatible(s):
     if s is None:
@@ -22,6 +24,16 @@ def str_to_win_file_compatible(s):
     s = re.sub(r"\"", "'", s)
     s = re.sub(r"[<>*?]", "", s)
     s = re.sub(r"\s+", ' ', s)
+
+    if len(s.encode('utf-8')) > MAX_FILENAME_LENGTH:
+        s = string_start_bytes(s, MAX_FILENAME_LENGTH) + "..."
+    return s
+
+
+def string_start_bytes(s, n):
+    l = len(s.encode('utf-8'))
+    if l > n:
+        return string_start_bytes(s[0:-1], n)
     return s
 
 
