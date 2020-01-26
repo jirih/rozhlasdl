@@ -19,7 +19,7 @@ class LoggerFactory(metaclass=Singleton):
             formatter = MyLogFormatter(fmt='%(asctime)s [%(levelname).1s] %(name).12s: %(message)s',
                                        datefmt='%H:%M:%S')
         else:
-            LoggerFactory.logging_handler = logging.FileHandler(log_file)
+            LoggerFactory.logging_handler = logging.FileHandler(log_file, encoding='utf-8')
             formatter = MyLogFormatter(fmt='%(asctime)s [%(levelname)s] %(name)s: %(message)s')
         formatter.default_msec_format = '%s.%03d'
         LoggerFactory.logging_handler.setFormatter(formatter)
