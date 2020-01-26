@@ -8,7 +8,10 @@ from urllib.request import Request, urlopen, urlretrieve
 
 from retry import retry
 
-from utils import makedirs, safe_print
+from log.LoggerFactory import LoggerFactory
+from utils import makedirs
+
+LOGGER = LoggerFactory.get(__name__)
 
 
 def create_path_with_index(path, index):
@@ -43,7 +46,7 @@ class FileDownloader:
         self.fake_download = fake_download
 
         if not os.path.isdir(folder):
-            print("Path %s does not exist. Creating." % self.folder)
+            LOGGER.warning("Path %s does not exist. Creating." % self.folder)
             makedirs(folder)
 
     def download(self, url, name=None):
@@ -58,25 +61,25 @@ class FileDownloader:
             if self.no_duplicates:
                 existing_file_length = os.path.getsize(path)
                 if content_length != existing_file_length:
-                    safe_print(
+                    LOGGER.warning(
                         "File %s already exists but has different length. New version will be downloaded." % path)
                     path = add_index_to_path(path, 1)
                 else:
-                    safe_print("File %s already exists. Skipping." % path)
+                    LOGGER.info("File %s already exists. Skipping." % path)
                     return
             else:
                 path = add_index_to_path(path, 1)
 
-        print("Downloading %s" % path)
+        LOGGER.debug("Downloading %s from %s." % (path, url))
         if self.fake_download:
             if self.progress_bar is None:
-                print("Download done.")
+                LOGGER.info("Download of %s from %s done." % (path, url))
             else:
-                print("100% |########################################################################|")
+                LOGGER.info("100% |########################################################################|")
         else:
             self.url_download(path, url)
             if self.progress_bar is None:
-                print("Download done.")
+                LOGGER.info("Download of %s from %s done." % (path, url))
 
     @retry((HTTPError, ContentTooShortError), tries=3, delay=5, backoff=2)
     def url_download(self, path, url):

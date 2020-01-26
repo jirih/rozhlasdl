@@ -44,6 +44,9 @@ optional arguments:
   -u, --utf-8           Explicitly set UTF-8 for stdin, stdout, stderr - against problems when piping
   -p, --progress-bar-disabled
                         Disable progress-bar
+  -l LOG_FILE, --log-file LOG_FILE
+                        Log file
+  -v, --verbose         Verbose
 ```
 Given urls must be valid rozhlas.cz pages.
 

@@ -11,9 +11,12 @@ from RozhlasException import RozhlasException
 from RozhlasListPageParser import RozhlasListPageParser
 from RozhlasPlayerPageParser import RozhlasPlayerPageParser
 from WebPageParser import WebPageParser
+from log.LoggerFactory import LoggerFactory
 from qualifiedTags import *
 from utils import str_to_win_file_compatible, complete_url, get_subdomain, \
-    safe_path_join, find_elements_with_attribute_containing, safe_print
+    safe_path_join, find_elements_with_attribute_containing
+
+LOGGER = LoggerFactory.get(__name__)
 
 
 def get_audio_div(root):
@@ -74,12 +77,12 @@ class MainDownloader():
 
         audio_title = page_parser.get_audio_title()
         if page_parser.is_copyright_expired():
-            print("%s: Copyright expired." % audio_title)
+            LOGGER.warning("%s: Copyright expired." % audio_title)
             return
         mp3_url = page_parser.get_mp3_url()
 
         if page_parser.has_other_parts():
-            print("%s: More parts detected." % audio_title)
+            LOGGER.info("%s: More parts detected." % audio_title)
             serial_name = page_parser.get_serial_name()
             folder = join(folder, str_to_win_file_compatible(serial_name))
 
@@ -88,7 +91,7 @@ class MainDownloader():
         if page_parser.has_other_parts():
             mp3_urls_and_audio_titles_of_other_parts = page_parser.get_mp3_urls_and_audio_titles_of_other_parts()
             for mp3_url, audio_title in mp3_urls_and_audio_titles_of_other_parts:
-                print("%s: %s " % ( audio_title, mp3_url))
+                LOGGER.debug("%s: %s " % (audio_title, mp3_url))
                 self.download_mp3(audio_title, folder, mp3_url)
 
     def download_player(self, block_track_player_div, folder):
@@ -105,7 +108,7 @@ class MainDownloader():
             raise RozhlasException("MP3 URL not given! Probably problem with parsing.")
         if audio_title is not None and mp3_url is not None:
 
-            safe_print("%s: %s" % (audio_title, mp3_url))
+            LOGGER.debug("%s: %s" % (audio_title, mp3_url))
             filename = str_to_win_file_compatible(audio_title) + ".mp3"
         else:
             filename = None
@@ -119,7 +122,7 @@ class MainDownloader():
         for link in links:
             self.download_url(complete_url(link, base_url))
 
-        print("All links found on %s has been processed." % base_url)
+        LOGGER.debug("All links found on %s has been processed." % base_url)
 
         if self.follow_next_pages:
             ul_pagers = root.findall(".//%s[@class='pager']" % UL)
@@ -129,7 +132,7 @@ class MainDownloader():
             current_page_number = int(
                 find_elements_with_attribute_containing(ul_pager, LI, "class", "pager__item--current")[0].text)
             if current_page_number > self.max_next_pages:
-                print("Maximal number of pages to follow reached.")
+                LOGGER.warning("Maximal number of pages to follow from % reached." % base_url)
                 return
 
             li_pager_item_next = find_elements_with_attribute_containing(ul_pager, LI, "class", "pager__item--next")
@@ -139,12 +142,11 @@ class MainDownloader():
             if len(a_link_to_next) == 0:
                 return
 
-            print("Following next page (%d)." % (current_page_number + 1))
+            LOGGER.info("Following next (%d) page on %s." % (current_page_number + 1, base_url))
             self.download_url(complete_url(a_link_to_next[0].attrib["href"], base_url))
 
     def download_url(self, url):
-        print()
-        print("Web page: %s" % url)
+        LOGGER.info("Web page: %s" % url)
 
         subdomain = get_subdomain(url)
         if subdomain == "hledani":
@@ -165,7 +167,7 @@ class MainDownloader():
             folder = safe_path_join(self.base_folder, subdomain)
             folder = safe_path_join(folder, station)
 
-            print("A player web page. Going to download its content, if available.")
+            LOGGER.info("A player web page. Going to download its content, if available.")
             self.download_player(block_track_player_div, folder)
 
         else:
@@ -173,12 +175,12 @@ class MainDownloader():
             audio_type = get_audio_type(audio_div)
             if audio_type == "article":
                 folder = safe_path_join(self.base_folder, subdomain)
-                print("Audio type is article. Going to download its content, if available.")
+                LOGGER.info("Audio type is article. Going to download its content, if available.")
                 self.download_audio_article(root, audio_div, folder)
             elif audio_type == "serial":
                 folder = safe_path_join(self.base_folder, subdomain)
-                print("Audio type is serial. Going to download all available parts.")
+                LOGGER.info("Audio type is serial. Going to download all available parts.")
                 self.download_audio_serial(root, audio_div, folder)
             else:
-                print("Audio type not recognized. Trying to find links to pages with media.")
+                LOGGER.warning("Audio type not recognized. Trying to find links to pages with media.")
                 self.download_links(root, url)

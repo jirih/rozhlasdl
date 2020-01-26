@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 import argparse
+import logging
 import sys
-import traceback
-from datetime import datetime
 from os.path import isabs
 from os.path import join
 from pathlib import Path
 
-from MainDownloader import MainDownloader
+from log.LoggerFactory import LoggerFactory
 from utils import makedirs, rozhlas_regex
 
 
@@ -33,6 +32,11 @@ def create_parser():
                         dest="utf8", default=False, action='store_true')
     parser.add_argument('-p', '--progress-bar-disabled', help='Disable progress-bar',
                         dest="progress_bar_enabled", default=True, action='store_false')
+    parser.add_argument('-l', '--log-file', help='Log file',
+                        dest="log_file", default=None, action='store')
+    parser.add_argument('-v', '--verbose', help='Verbose',
+                        dest="verbose", action='count', default=0)
+
     return parser
 
 
@@ -49,16 +53,21 @@ def main():
     fake_download = parser.parse_args().fake_download
     max_next_pages = int(parser.parse_args().max_next_pages)
     progress_bar_enabled = parser.parse_args().progress_bar_enabled
+    log_file = parser.parse_args().log_file
+    verbose = parser.parse_args().verbose
 
     if not isabs(folder):
         folder = join(str(Path.home()), "Downloads", folder)
     makedirs(folder)
 
+    logger = get_logger(get_log_file(folder, log_file), get_log_level(verbose))
+
+    from MainDownloader import MainDownloader # if imported earlier, loggers will not be created correctly
     main_downloader = MainDownloader(folder, no_duplicates=no_duplicates, follow_next_pages=follow_next_pages,
                                      fake_download=fake_download, max_next_pages=max_next_pages,
                                      progress_bar_enabled=progress_bar_enabled)
 
-    print("Download started: %s" % datetime.now())
+    logger.debug("Download started.")
 
     for url in urls:
         if validate_url(url):
@@ -66,14 +75,35 @@ def main():
             try:
                 main_downloader.download_url(url)
             except Exception as ex:
-                traceback.print_exc()
-            sys.stdout.flush()
-            sys.stderr.flush()
+                logger.exception("Exception %s raised when processing %s." % (str(ex), url))
         else:
-            print("%s is not a valid url" % url)
+            logger.error("%s is not a valid url." % url)
 
-    print("Download finished: %s" % datetime.now())
-    print()
+    logger.debug("Download finished.")
+
+
+def get_log_file(folder, log_file):
+    if log_file is None:
+        return None
+    if not isabs(log_file):
+        log_file = join(folder, log_file)
+    return log_file
+
+
+def get_logger(log_file, log_level):
+    LoggerFactory.set(log_file=log_file, default_log_level=log_level)
+    return LoggerFactory.get("rozhlasdl")
+
+
+def get_log_level(verbose):
+    if verbose > 1:
+        log_level = logging.DEBUG
+    elif verbose == 1:
+        log_level = logging.INFO
+    else:
+        log_level = logging.WARNING
+
+    return log_level
 
 
 if __name__ == "__main__":

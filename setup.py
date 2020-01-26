@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='rozhlasdl',
-    version='0.9.8',
+    version='0.9.9',
     url='https://github.com/jirih/rozhlas-dl',
     packages=find_packages(),
     license='GPLv3',
