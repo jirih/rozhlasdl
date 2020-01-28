@@ -5,7 +5,7 @@ from os.path import join
 from urllib.parse import urlparse, urlunparse
 
 rozhlas_regex = re.compile(
-    r'https://'
+    r'https?://'
     r'((?P<subdomain>\w+)\.)?'
     r'rozhlas.cz/.*', re.IGNORECASE)
 
@@ -73,3 +73,8 @@ def find_elements_with_attribute_containing(root, tag, attribute, content):
     elements = filter(lambda x: content in x.attrib[attribute], elements)
     result.extend(elements)
     return result
+
+
+def find_elements_with_attribute_equal_to(root, tag, attribute, content):
+    return root.findall(".//%s[@%s='%s']" % (tag, attribute, content))
+

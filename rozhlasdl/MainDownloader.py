@@ -10,6 +10,7 @@ from RozhlasAudioSerialPageParser import RozhlasAudioSerialPageParser
 from RozhlasException import RozhlasException
 from RozhlasListPageParser import RozhlasListPageParser
 from RozhlasPlayerPageParser import RozhlasPlayerPageParser
+from RozhlasSearchPageParser import RozhlasSearchPageParser
 from WebPageParser import WebPageParser
 from log.LoggerFactory import LoggerFactory
 from qualifiedTags import *
@@ -145,12 +146,18 @@ class MainDownloader():
             LOGGER.info("Following next (%d) page on %s." % (current_page_number + 1, base_url))
             self.download_url(complete_url(a_link_to_next[0].attrib["href"], base_url))
 
+    def download_search(self, root, base_url):
+        page_parser = RozhlasSearchPageParser(root)
+        if page_parser.boxes is None or len(page_parser.boxes) == 0:
+            LOGGER.warning("No results found for a search page %s." % base_url)
+        else:
+            for href in page_parser.get_hrefs():
+                self.download_url(href)
+
     def download_url(self, url):
         LOGGER.info("Web page: %s" % url)
 
         subdomain = get_subdomain(url)
-        if subdomain == "hledani":
-            raise NotImplementedError("Subdomain %s is not supported yet." % subdomain)
 
         root = get_root_of_page(url)
 
@@ -169,6 +176,9 @@ class MainDownloader():
 
             LOGGER.info("A player web page. Going to download its content, if available.")
             self.download_player(block_track_player_div, folder)
+
+        elif subdomain == "hledani":
+            self.download_search(root, url)
 
         else:
             audio_div = get_audio_div(root)
