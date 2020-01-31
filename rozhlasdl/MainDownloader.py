@@ -87,7 +87,11 @@ class MainDownloader():
             serial_name = page_parser.get_serial_name()
             folder = join(folder, str_to_win_file_compatible(serial_name))
 
-        self.download_mp3(audio_title, folder, mp3_url)
+        if mp3_url is None:
+            LOGGER.warning("%s: No audio file found." % audio_title)
+            return
+        else:
+            self.download_mp3(audio_title, folder, mp3_url)
 
         if page_parser.has_other_parts():
             mp3_urls_and_audio_titles_of_other_parts = page_parser.get_mp3_urls_and_audio_titles_of_other_parts()
