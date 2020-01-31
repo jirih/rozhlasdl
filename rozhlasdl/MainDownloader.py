@@ -15,7 +15,7 @@ from WebPageParser import WebPageParser
 from log.LoggerFactory import LoggerFactory
 from qualifiedTags import *
 from utils import str_to_win_file_compatible, complete_url, get_subdomain, \
-    safe_path_join, find_elements_with_attribute_containing
+    safe_path_join, find_elements_with_attribute_containing, find_elements_with_attribute_equal_to
 
 LOGGER = LoggerFactory.get(__name__)
 
@@ -133,7 +133,7 @@ class MainDownloader():
             current_page_number = int(
                 find_elements_with_attribute_containing(ul_pager, LI, "class", "pager__item--current")[0].text)
             if current_page_number > self.max_next_pages:
-                LOGGER.warning("Maximal number of pages to follow from % reached." % base_url)
+                LOGGER.info("Maximal number of pages to follow from %s reached." % base_url)
                 return
 
             li_pager_item_next = find_elements_with_attribute_containing(ul_pager, LI, "class", "pager__item--next")
@@ -153,6 +153,25 @@ class MainDownloader():
         else:
             for href in page_parser.get_hrefs():
                 self.download_url(href)
+        LOGGER.debug("All links found on %s has been processed." % base_url)
+        if self.follow_next_pages:
+            pager = root.findall(".//%s[@id='box-listovani']" % DIV)
+            if len(pager) == 0:
+                return
+            pager = pager[0]
+            current_page_number = int(
+                pager.findall(".//%s" % B)[0].text)
+
+            if current_page_number > self.max_next_pages:
+                LOGGER.info("Maximal number of pages to follow from %s reached." % base_url)
+                return
+
+            a_links_to_next = find_elements_with_attribute_equal_to(pager, A, "id", "sipka_right")
+            if len(a_links_to_next) == 0:
+                return
+
+            LOGGER.info("Following next (%d) page on %s." % (current_page_number + 1, base_url))
+            self.download_url(complete_url(a_links_to_next[0].attrib["href"], base_url))
 
     def download_url(self, url):
         LOGGER.info("Web page: %s" % url)
