@@ -8,7 +8,9 @@ Clone the repo and go to its root directory.
 
 install wheel: `pip install wheel`
 run: `python setup.py sdist bdist_wheel`
-install the wheel: `pip install dist/rozhlasdl-0.9.1-py3-none-any.whl`
+install the wheel: `pip install dist/rozhlasdl-{{version}}-py3-none-any.whl`
+
+(Note: Input a correct {{version}}.)
 
 There will be a script in your 
 `Python/Scripts` directory. On Windows, you can find it as `C:\Program Files\Python38\Scripts\rozhlasdl.exe`.
