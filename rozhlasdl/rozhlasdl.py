@@ -34,6 +34,8 @@ def create_parser():
                         dest="progress_bar_enabled", default=True, action='store_false')
     parser.add_argument('-l', '--log-file', help='Log file',
                         dest="log_file", default=None, action='store')
+    parser.add_argument('-t', '--use-page-title', help='Use page title instead of audio description',
+                        dest="use_page_title", action='store_true', default=False)
     parser.add_argument('-v', '--verbose', help='Verbose',
                         dest="verbose", action='count', default=0)
 
@@ -42,19 +44,21 @@ def create_parser():
 
 def main():
     parser = create_parser()
-    if parser.parse_args().utf8:
+    args = parser.parse_args()
+    if args.utf8:
         sys.stdout = open(sys.stdout.fileno(), 'w', encoding='utf-8', errors='surrogateescape')
         sys.stderr = open(sys.stderr.fileno(), 'w', encoding='utf-8', errors='backslashescape')
         sys.stdin = open(sys.stdin.fileno(), 'r', encoding='utf-8', errors='surrogateescape')
-    urls = parser.parse_args().url
-    folder = parser.parse_args().dir
-    no_duplicates = not parser.parse_args().no_duplicate_skipping
-    follow_next_pages = parser.parse_args().follow_next_pages
-    fake_download = parser.parse_args().fake_download
-    max_next_pages = int(parser.parse_args().max_next_pages)
-    progress_bar_enabled = parser.parse_args().progress_bar_enabled
-    log_file = parser.parse_args().log_file
-    verbose = parser.parse_args().verbose
+    urls = args.url
+    folder = args.dir
+    no_duplicates = not args.no_duplicate_skipping
+    follow_next_pages = args.follow_next_pages
+    fake_download = args.fake_download
+    max_next_pages = int(args.max_next_pages)
+    progress_bar_enabled = args.progress_bar_enabled
+    log_file = args.log_file
+    verbose = args.verbose
+    use_page_title = args.use_page_title
 
     if not isabs(folder):
         folder = join(str(Path.home()), "Downloads", folder)
@@ -62,10 +66,10 @@ def main():
 
     logger = get_logger(get_log_file(folder, log_file), get_log_level(verbose))
 
-    from MainDownloader import MainDownloader # if imported earlier, loggers will not be created correctly
+    from MainDownloader import MainDownloader  # if imported earlier, loggers will not be created correctly
     main_downloader = MainDownloader(folder, no_duplicates=no_duplicates, follow_next_pages=follow_next_pages,
                                      fake_download=fake_download, max_next_pages=max_next_pages,
-                                     progress_bar_enabled=progress_bar_enabled)
+                                     progress_bar_enabled=progress_bar_enabled, use_page_title=use_page_title)
 
     logger.debug("Download started.")
 

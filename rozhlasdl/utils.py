@@ -77,4 +77,3 @@ def find_elements_with_attribute_containing(root, tag, attribute, content):
 
 def find_elements_with_attribute_equal_to(root, tag, attribute, content):
     return root.findall(".//%s[@%s='%s']" % (tag, attribute, content))
-

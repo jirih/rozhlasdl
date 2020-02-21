@@ -35,16 +35,26 @@ class RozhlasAudioArticlePageParser:
     def get_mp3_url(self):
         return get_mp3_url_from_element(self.audio_div)
 
-    def get_audio_title(self, number=1):
-        for div in self.audio_div.iter(DIV):
-            if "aria-labelledby" in div.attrib:
-                aria_labelledby = div.attrib["aria-labelledby"]
-                if aria_labelledby == "titulek audia":
-                    if self.has_other_parts():
-                        return "%02d %s" % (number, div.text)
-                    else:
-                        return div.text
-        return None
+    def get_audio_title(self, number=1, use_page_title=False):
+        if use_page_title:
+            title = self.get_serial_name()
+            if title is None:
+                return None
+            return self.add_number_if_has_other_parts(number, title)
+        else:
+            for div in self.audio_div.iter(DIV):
+                if "aria-labelledby" in div.attrib:
+                    aria_labelledby = div.attrib["aria-labelledby"]
+                    if aria_labelledby == "titulek audia":
+                        text = div.text
+                        return self.add_number_if_has_other_parts(number, text)
+            return None
+
+    def add_number_if_has_other_parts(self, number, text):
+        if self.has_other_parts():
+            return "%02d %s" % (number, text)
+        else:
+            return text
 
     def is_copyright_expired(self):
         for div in self.audio_div.iter(DIV):
@@ -89,8 +99,6 @@ class RozhlasAudioArticlePageParser:
             if "class" in div.attrib:
                 klass = div.attrib["class"]
                 if klass == "filename__text":
-                    if self.has_other_parts():
-                        return "%02d %s" % (number, div.text)
-                    else:
-                        return div.text
+                    text = div.text
+                    return self.add_number_if_has_other_parts(number, text)
         return None

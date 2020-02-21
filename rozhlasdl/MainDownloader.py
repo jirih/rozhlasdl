@@ -55,13 +55,14 @@ def get_root_of_page(url):
 
 class MainDownloader():
     def __init__(self, base_folder, no_duplicates=True, follow_next_pages=False, fake_download=False, max_next_pages=3,
-                 progress_bar_enabled=True):
+                 progress_bar_enabled=True, use_page_title=False):
         self.base_folder = base_folder
         self.no_duplicates = no_duplicates
         self.follow_next_pages = follow_next_pages
         self.fake_download = fake_download
         self.max_next_pages = max_next_pages
         self.progress_bar_enabled = progress_bar_enabled
+        self.use_page_title = use_page_title
 
     def download_audio_serial(self, root, audio_div, folder):
         page_parser = RozhlasAudioSerialPageParser(root, audio_div)
@@ -76,7 +77,7 @@ class MainDownloader():
     def download_audio_article(self, root, audio_div, folder):
         page_parser = RozhlasAudioArticlePageParser(root, audio_div)
 
-        audio_title = page_parser.get_audio_title()
+        audio_title = page_parser.get_audio_title(use_page_title=self.use_page_title)
         if page_parser.is_copyright_expired():
             LOGGER.warning("%s: Copyright expired." % audio_title)
             return

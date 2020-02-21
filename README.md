@@ -48,6 +48,7 @@ optional arguments:
                         Disable progress-bar
   -l LOG_FILE, --log-file LOG_FILE
                         Log file
+  -t, --use-page-title  Use page title instead of audio description  
   -v, --verbose         Verbose
 ```
 Given urls must be valid rozhlas.cz pages.
