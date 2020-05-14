@@ -79,7 +79,7 @@ def main():
             try:
                 main_downloader.download_url(url)
             except Exception as ex:
-                logger.exception("Exception %s raised when processing %s." % (str(ex), url))
+                logger.exception("Exception %s raised when processing %s ." % (str(ex), url))
         else:
             logger.error("%s is not a valid url." % url)
 
