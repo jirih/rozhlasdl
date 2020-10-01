@@ -16,6 +16,7 @@ def str_to_win_file_compatible(s):
     if s is None:
         return "None"
     s = s.strip()
+    s = re.sub(r'\.+$', "", s)
     s = s.replace("\\", ";")
     s = re.sub(r"[/|]", ";", s)
     s = re.sub(r":", "-", s)
