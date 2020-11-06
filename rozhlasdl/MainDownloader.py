@@ -29,6 +29,10 @@ def get_audio_div(root):
             if re.match(r"file-\d+", div_id) and "class" in div.attrib and "audio-article-player" in div.attrib[
                 "class"]:
                 return div
+            if re.match(r"file-\d+", div_id) and "class" in div.attrib and "file-audio" in div.attrib[
+                "class"]:
+                return div
+
     return None
 
 
@@ -42,6 +46,9 @@ def get_audio_type(div):
         if re.match(r"file-\d+", div_id) and "class" in div.attrib and "audio-article-player" in div.attrib[
             "class"]:
             return "article"
+        if re.match(r"file-\d+", div_id) and "class" in div.attrib and "file-audio" in div.attrib[
+            "class"]:
+            return "fileaudio"
     return None
 
 
@@ -207,7 +214,7 @@ class MainDownloader():
         else:
             audio_div = get_audio_div(root)
             audio_type = get_audio_type(audio_div)
-            if audio_type == "article":
+            if audio_type == "article" or audio_type == "fileaudio":
                 folder = safe_path_join(self.base_folder, subdomain)
                 LOGGER.info("Audio type is article. Going to download its content, if available.")
                 self.download_audio_article(root, audio_div, folder)
