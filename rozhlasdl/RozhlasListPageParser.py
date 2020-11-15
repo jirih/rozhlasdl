@@ -7,7 +7,9 @@ class RozhlasListPageParser:
         links = []
         for a in self.root.iter('{http://www.w3.org/1999/xhtml}a'):
             if "class" in a.attrib and (
-                    "button-play" in a.attrib["class"] or "button-listaction--play" in a.attrib["class"]):
+                    "button-play" in a.attrib["class"]
+                    or "button-listaction--play" in a.attrib["class"]
+                    or "image-link" in a.attrib["class"]):
                 if "href" in a.attrib:
                     links.append(a.attrib["href"])
         return links

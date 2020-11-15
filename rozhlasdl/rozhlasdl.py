@@ -36,6 +36,8 @@ def create_parser():
                         dest="log_file", default=None, action='store')
     parser.add_argument('-t', '--use-page-title', help='Use page title instead of audio description',
                         dest="use_page_title", action='store_true', default=False)
+    parser.add_argument('-k', '--kindness', help='Number of seconds to wait before a next download of audio.',
+                        dest="kindness", default=0, action='store')
     parser.add_argument('-v', '--verbose', help='Verbose',
                         dest="verbose", action='count', default=0)
 
@@ -57,6 +59,7 @@ def main():
     max_next_pages = int(args.max_next_pages)
     progress_bar_enabled = args.progress_bar_enabled
     log_file = args.log_file
+    kindness = int(args.kindness)
     verbose = args.verbose
     use_page_title = args.use_page_title
 
@@ -69,7 +72,7 @@ def main():
     from MainDownloader import MainDownloader  # if imported earlier, loggers will not be created correctly
     main_downloader = MainDownloader(folder, no_duplicates=no_duplicates, follow_next_pages=follow_next_pages,
                                      fake_download=fake_download, max_next_pages=max_next_pages,
-                                     progress_bar_enabled=progress_bar_enabled, use_page_title=use_page_title)
+                                     progress_bar_enabled=progress_bar_enabled, use_page_title=use_page_title, kindness=kindness)
 
     logger.debug("Download started.")
 

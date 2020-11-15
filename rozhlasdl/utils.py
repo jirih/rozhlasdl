@@ -7,7 +7,7 @@ from urllib.parse import urlparse, urlunparse
 rozhlas_regex = re.compile(
     r'https?://'
     r'((?P<subdomain>\w+)\.)?'
-    r'rozhlas.cz/.*', re.IGNORECASE)
+    r'(rozhlas|radio).cz/.*', re.IGNORECASE)
 
 MAX_FILENAME_LENGTH = 240
 

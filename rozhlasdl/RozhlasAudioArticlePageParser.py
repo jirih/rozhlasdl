@@ -4,7 +4,7 @@ import re
 from qualifiedTags import DIV, A, H1
 
 # pattern = re.compile("https://.*rozhlas.cz/.*/[0-9a-f]{8}([0-9a-f]{24})?\\.mp3(\\?.*)?")
-pattern = re.compile("https://.*rozhlas.cz/.*\\.(mp3|flac)(\\?.*)?")
+pattern = re.compile("https://.*(rozhlas|radio).cz/.*\\.(mp3|flac)(\\?.*)?")
 
 
 def get_other_part_audio_title(part):

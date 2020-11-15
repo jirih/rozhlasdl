@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import re
+import time
 from os.path import join
 
 from FileDownloader import FileDownloader
@@ -62,7 +63,7 @@ def get_root_of_page(url):
 
 class MainDownloader():
     def __init__(self, base_folder, no_duplicates=True, follow_next_pages=False, fake_download=False, max_next_pages=3,
-                 progress_bar_enabled=True, use_page_title=False):
+                 progress_bar_enabled=True, use_page_title=False, kindness=0):
         self.base_folder = base_folder
         self.no_duplicates = no_duplicates
         self.follow_next_pages = follow_next_pages
@@ -70,6 +71,8 @@ class MainDownloader():
         self.max_next_pages = max_next_pages
         self.progress_bar_enabled = progress_bar_enabled
         self.use_page_title = use_page_title
+        self.kindness = kindness
+        self.something_downloaded = False
 
     def download_audio_serial(self, root, audio_div, folder):
         page_parser = RozhlasAudioSerialPageParser(root, audio_div)
@@ -125,9 +128,13 @@ class MainDownloader():
             filename = str_to_win_file_compatible(audio_title) + ".mp3"
         else:
             filename = None
+        if self.something_downloaded:
+            LOGGER.debug("Waiting %d seconds." % self.kindness)
+            time.sleep(self.kindness)
         fd = FileDownloader(folder, progress_bar=MyProgressBar() if self.progress_bar_enabled else None,
                             no_duplicates=self.no_duplicates, fake_download=self.fake_download)
         fd.download(mp3_url, filename)
+        self.something_downloaded = True
 
     def download_links(self, root, base_url):
         page_parser = RozhlasListPageParser(root)
