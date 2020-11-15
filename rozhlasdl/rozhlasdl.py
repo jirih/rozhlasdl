@@ -25,6 +25,8 @@ def create_parser():
                         dest="follow_next_pages", default=False, action='store_true')
     parser.add_argument('-m', '--max-next-pages', help='Maximal number of next pages to follow',
                         dest="max_next_pages", default=3, action='store')
+    parser.add_argument('-i', '--follow-image-links', help='Enable following image links.',
+                        dest="follow_image_links", default=False, action='store_true')
     parser.add_argument('-s', '--simulate-audio-download', help='Downloads of audio files will be faked',
                         dest="fake_download", default=False, action='store_true')
     parser.add_argument('-u', '--utf-8',
@@ -36,7 +38,7 @@ def create_parser():
                         dest="log_file", default=None, action='store')
     parser.add_argument('-t', '--use-page-title', help='Use page title instead of audio description',
                         dest="use_page_title", action='store_true', default=False)
-    parser.add_argument('-k', '--kindness', help='Number of seconds to wait before a next download of audio.',
+    parser.add_argument('-k', '--kindness', help='Number of seconds to wait before a next download.',
                         dest="kindness", default=0, action='store')
     parser.add_argument('-v', '--verbose', help='Verbose',
                         dest="verbose", action='count', default=0)
@@ -55,6 +57,7 @@ def main():
     folder = args.dir
     no_duplicates = not args.no_duplicate_skipping
     follow_next_pages = args.follow_next_pages
+    follow_image_links = args.follow_image_links
     fake_download = args.fake_download
     max_next_pages = int(args.max_next_pages)
     progress_bar_enabled = args.progress_bar_enabled
@@ -72,7 +75,8 @@ def main():
     from MainDownloader import MainDownloader  # if imported earlier, loggers will not be created correctly
     main_downloader = MainDownloader(folder, no_duplicates=no_duplicates, follow_next_pages=follow_next_pages,
                                      fake_download=fake_download, max_next_pages=max_next_pages,
-                                     progress_bar_enabled=progress_bar_enabled, use_page_title=use_page_title, kindness=kindness)
+                                     progress_bar_enabled=progress_bar_enabled, use_page_title=use_page_title,
+                                     kindness=kindness, follow_image_links=follow_image_links)
 
     logger.debug("Download started.")
 
@@ -85,8 +89,9 @@ def main():
                 logger.exception("Exception %s raised when processing %s ." % (str(ex), url))
         else:
             logger.error("%s is not a valid url." % url)
+    stats = main_downloader.get_stats()
 
-    logger.debug("Download finished.")
+    logger.info("Download finished. Processed %d web pages and downloaded %d audio files." % stats)
 
 
 def get_log_file(folder, log_file):

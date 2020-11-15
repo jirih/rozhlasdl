@@ -66,7 +66,7 @@ class FileDownloader:
                     path = add_index_to_path(path, 1)
                 else:
                     LOGGER.info("File %s already exists. Skipping." % path)
-                    return
+                    return False
             else:
                 path = add_index_to_path(path, 1)
 
@@ -80,6 +80,7 @@ class FileDownloader:
             self.url_download(path, url)
             if self.progress_bar is None:
                 LOGGER.info("Download of %s from %s done." % (path, url))
+        return True
 
     @retry((HTTPError, ContentTooShortError), tries=3, delay=5, backoff=2)
     def url_download(self, path, url):

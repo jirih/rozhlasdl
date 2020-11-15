@@ -63,16 +63,19 @@ def get_root_of_page(url):
 
 class MainDownloader():
     def __init__(self, base_folder, no_duplicates=True, follow_next_pages=False, fake_download=False, max_next_pages=3,
-                 progress_bar_enabled=True, use_page_title=False, kindness=0):
+                 progress_bar_enabled=True, use_page_title=False, kindness=0, follow_image_links=False):
         self.base_folder = base_folder
         self.no_duplicates = no_duplicates
         self.follow_next_pages = follow_next_pages
         self.fake_download = fake_download
         self.max_next_pages = max_next_pages
+        self.follow_image_links = follow_image_links
         self.progress_bar_enabled = progress_bar_enabled
         self.use_page_title = use_page_title
         self.kindness = kindness
         self.something_downloaded = False
+        self.downloaded_urls = []
+        self.downloaded_audios_counter = 0
 
     def download_audio_serial(self, root, audio_div, folder):
         page_parser = RozhlasAudioSerialPageParser(root, audio_div)
@@ -129,15 +132,17 @@ class MainDownloader():
         else:
             filename = None
         if self.something_downloaded:
-            LOGGER.debug("Waiting %d seconds." % self.kindness)
+            #LOGGER.debug("Waiting %d seconds." % self.kindness)
             time.sleep(self.kindness)
         fd = FileDownloader(folder, progress_bar=MyProgressBar() if self.progress_bar_enabled else None,
                             no_duplicates=self.no_duplicates, fake_download=self.fake_download)
-        fd.download(mp3_url, filename)
+        not_skipped = fd.download(mp3_url, filename)
+        if not_skipped:
+            self.downloaded_audios_counter += 1
         self.something_downloaded = True
 
     def download_links(self, root, base_url):
-        page_parser = RozhlasListPageParser(root)
+        page_parser = RozhlasListPageParser(root, self.follow_image_links)
         links = page_parser.get_links()
         for link in links:
             self.download_url(complete_url(link, base_url))
@@ -194,10 +199,19 @@ class MainDownloader():
 
     def download_url(self, url):
         LOGGER.info("Web page: %s" % url)
+        if url in self.downloaded_urls:
+            LOGGER.debug("Web page %s has been already processed" % url)
+            return
+        else:
+            self.downloaded_urls.append(url)
 
         subdomain = get_subdomain(url)
 
+        if self.something_downloaded:
+            #LOGGER.debug("Waiting %d seconds." % self.kindness)
+            time.sleep(self.kindness)
         root = get_root_of_page(url)
+        self.something_downloaded = True
 
         if subdomain == "prehravac":
             body = root.findall(".//%s" % BODY)[0]
@@ -232,3 +246,6 @@ class MainDownloader():
             else:
                 LOGGER.warning("Audio type not recognized. Trying to find links to pages with media.")
                 self.download_links(root, url)
+
+    def get_stats(self):
+        return len(self.downloaded_urls), self.downloaded_audios_counter
