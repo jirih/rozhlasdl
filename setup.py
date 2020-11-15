@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='rozhlasdl',
-    version='0.9.18',
+    version='0.9.19',
     url='https://github.com/jirih/rozhlas-dl',
     packages=find_packages(),
     license='GPLv3',
@@ -11,7 +11,7 @@ setup(
     description='Downloader for rozhlas.cz',
     long_description='Downloader for rozhlas.cz',
     long_description_content_type="text/markdown",
-    python_requires='>=3.8',
+    python_requires='>=3.7',
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
