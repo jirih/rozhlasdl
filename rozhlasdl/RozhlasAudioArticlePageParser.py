@@ -70,7 +70,13 @@ class RozhlasAudioArticlePageParser:
             if "class" in div.attrib:
                 klass = div.attrib["class"]
                 if "wysiwyg-asset" in klass and "asset-type-audio" in klass:
-                    parts.append(div)
+                    for div_in_div in div:
+                        if "class" in div_in_div.attrib:
+                            div_in_div_klass = div_in_div.attrib["class"]
+                            if "audio-rights-expired" in div_in_div_klass:
+                                break
+                            else:
+                                parts.append(div)
         return parts
 
     def has_other_parts(self):

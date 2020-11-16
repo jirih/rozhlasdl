@@ -205,47 +205,52 @@ class MainDownloader():
         else:
             self.downloaded_urls.append(url)
 
-        subdomain = get_subdomain(url)
+        try:
+            subdomain = get_subdomain(url)
 
-        if self.something_downloaded:
-            #LOGGER.debug("Waiting %d seconds." % self.kindness)
-            time.sleep(self.kindness)
-        root = get_root_of_page(url)
-        self.something_downloaded = True
+            if self.something_downloaded:
+                #LOGGER.debug("Waiting %d seconds." % self.kindness)
+                time.sleep(self.kindness)
+            root = get_root_of_page(url)
+            self.something_downloaded = True
 
-        if subdomain == "prehravac":
-            body = root.findall(".//%s" % BODY)[0]
-            if "mode-live" in body.attrib["class"]:
-                raise NotImplementedError("Live mode not supported.")
+            if subdomain == "prehravac":
+                body = root.findall(".//%s" % BODY)[0]
+                if "mode-live" in body.attrib["class"]:
+                    raise NotImplementedError("Live mode not supported.")
 
-            block_track_player_div = root.findall(".//%s[@id='block-track-player']" % DIV)[0]
+                block_track_player_div = root.findall(".//%s[@id='block-track-player']" % DIV)[0]
 
-            body_id = body.attrib["id"]
-            station = body_id.split('-')[-1]
+                body_id = body.attrib["id"]
+                station = body_id.split('-')[-1]
 
-            folder = safe_path_join(self.base_folder, subdomain)
-            folder = safe_path_join(folder, station)
-
-            LOGGER.info("A player web page. Going to download its content, if available.")
-            self.download_player(block_track_player_div, folder)
-
-        elif subdomain == "hledani":
-            self.download_search(root, url)
-
-        else:
-            audio_div = get_audio_div(root)
-            audio_type = get_audio_type(audio_div)
-            if audio_type == "article" or audio_type == "fileaudio":
                 folder = safe_path_join(self.base_folder, subdomain)
-                LOGGER.info("Audio type is article. Going to download its content, if available.")
-                self.download_audio_article(root, audio_div, folder)
-            elif audio_type == "serial":
-                folder = safe_path_join(self.base_folder, subdomain)
-                LOGGER.info("Audio type is serial. Going to download all available parts.")
-                self.download_audio_serial(root, audio_div, folder)
+                folder = safe_path_join(folder, station)
+
+                LOGGER.info("A player web page. Going to download its content, if available.")
+                self.download_player(block_track_player_div, folder)
+
+            elif subdomain == "hledani":
+                self.download_search(root, url)
+
             else:
-                LOGGER.warning("Audio type not recognized. Trying to find links to pages with media.")
-                self.download_links(root, url)
+                audio_div = get_audio_div(root)
+                audio_type = get_audio_type(audio_div)
+                if audio_type == "article" or audio_type == "fileaudio":
+                    folder = safe_path_join(self.base_folder, subdomain)
+                    LOGGER.info("Audio type is article. Going to download its content, if available.")
+                    self.download_audio_article(root, audio_div, folder)
+                elif audio_type == "serial":
+                    folder = safe_path_join(self.base_folder, subdomain)
+                    LOGGER.info("Audio type is serial. Going to download all available parts.")
+                    self.download_audio_serial(root, audio_div, folder)
+                else:
+                    LOGGER.warning("Audio type not recognized. Trying to find links to pages with media.")
+                    self.download_links(root, url)
+        except Exception as exc:
+            LOGGER.error(
+                "url: '%s', %s" % (url, exc))
+
 
     def get_stats(self):
         return len(self.downloaded_urls), self.downloaded_audios_counter
