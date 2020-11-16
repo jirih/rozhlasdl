@@ -27,10 +27,10 @@ def get_audio_div(root):
             div_id = div.attrib["id"]
             if div_id == "file-serial-player":
                 return div
-            if re.match(r"file-\d+", div_id) and "class" in div.attrib and "audio-article-player" in div.attrib[
+            if re.match(r"file(-\d+)?", div_id) and "class" in div.attrib and "audio-article-player" in div.attrib[
                 "class"]:
                 return div
-            if re.match(r"file-\d+", div_id) and "class" in div.attrib and "file-audio" in div.attrib[
+            if re.match(r"file(-\d+)?", div_id) and "class" in div.attrib and "file-audio" in div.attrib[
                 "class"]:
                 return div
 
