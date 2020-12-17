@@ -2,7 +2,7 @@
 ###### Downloader for rozhlas.cz
 
 ## Installation
-The software is developed in Python 3.8, so you should use it.
+The software is developed in Python 3.8, so you should use it. However, it is regularly compiled also in Python 3.7 which you can use too.
 
 Clone the repo and go to its root directory.
 

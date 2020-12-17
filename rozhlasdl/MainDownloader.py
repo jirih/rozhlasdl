@@ -16,7 +16,7 @@ from WebPageParser import WebPageParser
 from log.LoggerFactory import LoggerFactory
 from qualifiedTags import *
 from utils import str_to_win_file_compatible, complete_url, get_subdomain, \
-    safe_path_join, find_elements_with_attribute_containing, find_elements_with_attribute_equal_to
+    safe_path_join, find_elements_with_attribute_containing, find_elements_with_attribute_equal_to, rozhlas_regex
 
 LOGGER = LoggerFactory.get(__name__)
 
@@ -204,6 +204,10 @@ class MainDownloader():
             return
         else:
             self.downloaded_urls.append(url)
+
+        if not rozhlas_regex.match(url):
+            LOGGER.warning("URL %s not supported" % url)
+            return
 
         try:
             subdomain = get_subdomain(url)
