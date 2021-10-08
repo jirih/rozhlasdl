@@ -40,6 +40,8 @@ def create_parser():
                         dest="use_page_title", action='store_true', default=False)
     parser.add_argument('-k', '--kindness', help='Number of seconds to wait before a next download.',
                         dest="kindness", default=0, action='store')
+    parser.add_argument('--no-subdomain-subdir', help='Do not use subdomain subdir',
+                        dest="subdomain_subdir_enabled", default=True, action='store_false')
     parser.add_argument('-v', '--verbose', help='Verbose',
                         dest="verbose", action='count', default=0)
 
@@ -64,6 +66,7 @@ def main():
     log_file = args.log_file
     kindness = int(args.kindness)
     verbose = args.verbose
+    subdomain_subdir_enabled = args.subdomain_subdir_enabled
     use_page_title = args.use_page_title
 
     if not isabs(folder):
@@ -76,7 +79,8 @@ def main():
     main_downloader = MainDownloader(folder, no_duplicates=no_duplicates, follow_next_pages=follow_next_pages,
                                      fake_download=fake_download, max_next_pages=max_next_pages,
                                      progress_bar_enabled=progress_bar_enabled, use_page_title=use_page_title,
-                                     kindness=kindness, follow_image_links=follow_image_links)
+                                     kindness=kindness, follow_image_links=follow_image_links,
+                                     subdomain_subdir_enabled=subdomain_subdir_enabled)
 
     logger.debug("Download started.")
 

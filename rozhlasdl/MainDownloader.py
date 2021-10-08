@@ -63,7 +63,8 @@ def get_root_of_page(url):
 
 class MainDownloader():
     def __init__(self, base_folder, no_duplicates=True, follow_next_pages=False, fake_download=False, max_next_pages=3,
-                 progress_bar_enabled=True, use_page_title=False, kindness=0, follow_image_links=False):
+                 progress_bar_enabled=True, use_page_title=False, kindness=0, follow_image_links=False,
+                 subdomain_subdir_enabled=True):
         self.base_folder = base_folder
         self.no_duplicates = no_duplicates
         self.follow_next_pages = follow_next_pages
@@ -73,6 +74,7 @@ class MainDownloader():
         self.progress_bar_enabled = progress_bar_enabled
         self.use_page_title = use_page_title
         self.kindness = kindness
+        self.subdomain_subdir_enabled = subdomain_subdir_enabled
         self.something_downloaded = False
         self.downloaded_urls = []
         self.downloaded_audios_counter = 0
@@ -241,12 +243,12 @@ class MainDownloader():
                 audio_div = get_audio_div(root)
                 audio_type = get_audio_type(audio_div)
                 if audio_type == "article" or audio_type == "fileaudio":
-                    folder = safe_path_join(self.base_folder, subdomain)
                     LOGGER.info("Audio type is article. Going to download its content, if available.")
+                    folder = safe_path_join(self.base_folder, subdomain if self.subdomain_subdir_enabled else None)
                     self.download_audio_article(root, audio_div, folder)
                 elif audio_type == "serial":
-                    folder = safe_path_join(self.base_folder, subdomain)
                     LOGGER.info("Audio type is serial. Going to download all available parts.")
+                    folder = safe_path_join(self.base_folder, subdomain if self.subdomain_subdir_enabled else None)
                     self.download_audio_serial(root, audio_div, folder)
                 else:
                     LOGGER.warning("Audio type not recognized. Trying to find links to pages with media.")
