@@ -4,6 +4,7 @@ import time
 from os.path import join
 
 from FileDownloader import FileDownloader
+from MujRozhlasPlayerPageParser import MujRozhlasPlayerPageParser
 from MyProgressBar import MyProgressBar
 from PageDownloader import PageDownloader
 from RozhlasAudioArticlePageParser import RozhlasAudioArticlePageParser
@@ -33,6 +34,11 @@ def get_audio_div(root):
             if re.match(r"file(-\d+)?", div_id) and "class" in div.attrib and "file-audio" in div.attrib[
                 "class"]:
                 return div
+        else:
+            if "class" in div.attrib:
+                div_class = div.attrib["class"]
+                if "mujRozhlasPlayer" in div_class:
+                    return div
 
     return None
 
@@ -40,6 +46,9 @@ def get_audio_div(root):
 def get_audio_type(div):
     if div is None:
         return None
+    if "class" in div.attrib and "mujRozhlasPlayer" in div.attrib[
+        "class"]:
+        return "mujRozhlasPlayer"
     if "id" in div.attrib:
         div_id = div.attrib["id"]
         if div_id == "file-serial-player":
@@ -64,12 +73,13 @@ def get_root_of_page(url):
 class MainDownloader():
     def __init__(self, base_folder, no_duplicates=True, follow_next_pages=False, fake_download=False, max_next_pages=3,
                  progress_bar_enabled=True, use_page_title=False, kindness=0, follow_image_links=False,
-                 subdomain_subdir_enabled=True):
+                 subdomain_subdir_enabled=True, max_depth=2):
         self.base_folder = base_folder
         self.no_duplicates = no_duplicates
         self.follow_next_pages = follow_next_pages
         self.fake_download = fake_download
         self.max_next_pages = max_next_pages
+        self.max_depth = max_depth
         self.follow_image_links = follow_image_links
         self.progress_bar_enabled = progress_bar_enabled
         self.use_page_title = use_page_title
@@ -78,6 +88,7 @@ class MainDownloader():
         self.something_downloaded = False
         self.downloaded_urls = []
         self.downloaded_audios_counter = 0
+        self.depth = 0
 
     def download_audio_serial(self, root, audio_div, folder):
         page_parser = RozhlasAudioSerialPageParser(root, audio_div)
@@ -88,6 +99,27 @@ class MainDownloader():
 
         for mp3_url, audio_title in mp3_urls_and_audio_titles:
             self.download_mp3(audio_title, serial_folder, mp3_url)
+
+    def download_audio_muj_rozhlas_player(self, root, audio_div, folder):
+        page_parser = MujRozhlasPlayerPageParser(root, audio_div)
+        audio_title = page_parser.get_audio_title(use_page_title=self.use_page_title)
+        if page_parser.is_copyright_expired():
+            LOGGER.warning("%s: Copyright expired." % audio_title)
+            return
+        mp3_urls_and_audio_titles = page_parser.get_mp3_urls_and_audio_titles()
+
+        if mp3_urls_and_audio_titles is None or not mp3_urls_and_audio_titles:
+            LOGGER.warning("%s: No audio file found." % audio_title)
+            return
+
+        if len(mp3_urls_and_audio_titles) > 1:
+            LOGGER.info("%s: More parts detected." % audio_title)
+            serial_name = audio_title
+            folder = join(folder, str_to_win_file_compatible(serial_name))
+
+        for mp3_url, audio_title in mp3_urls_and_audio_titles:
+            LOGGER.debug("%s: %s " % (audio_title, mp3_url))
+            self.download_mp3(audio_title, folder, mp3_url)
 
     def download_audio_article(self, root, audio_div, folder):
         page_parser = RozhlasAudioArticlePageParser(root, audio_div)
@@ -134,7 +166,7 @@ class MainDownloader():
         else:
             filename = None
         if self.something_downloaded:
-            #LOGGER.debug("Waiting %d seconds." % self.kindness)
+            # LOGGER.debug("Waiting %d seconds." % self.kindness)
             time.sleep(self.kindness)
         fd = FileDownloader(folder, progress_bar=MyProgressBar() if self.progress_bar_enabled else None,
                             no_duplicates=self.no_duplicates, fake_download=self.fake_download)
@@ -215,7 +247,7 @@ class MainDownloader():
             subdomain = get_subdomain(url)
 
             if self.something_downloaded:
-                #LOGGER.debug("Waiting %d seconds." % self.kindness)
+                # LOGGER.debug("Waiting %d seconds." % self.kindness)
                 time.sleep(self.kindness)
             root = get_root_of_page(url)
             self.something_downloaded = True
@@ -250,13 +282,22 @@ class MainDownloader():
                     LOGGER.info("Audio type is serial. Going to download all available parts.")
                     folder = safe_path_join(self.base_folder, subdomain if self.subdomain_subdir_enabled else None)
                     self.download_audio_serial(root, audio_div, folder)
+                elif audio_type == "mujRozhlasPlayer":
+                    LOGGER.info("Audio type is mujRozhlasPlayer.")
+                    folder = safe_path_join(self.base_folder, subdomain if self.subdomain_subdir_enabled else None)
+                    self.download_audio_muj_rozhlas_player(root, audio_div, folder)
                 else:
                     LOGGER.warning("Audio type not recognized. Trying to find links to pages with media.")
-                    self.download_links(root, url)
+                    self.depth += 1
+                    if self.depth > self.max_depth:
+                        LOGGER.warning("Maximal depth to dive has been reached. Not going to: %s" % url)
+                    else:
+                        self.download_links(root, url)
+                        self.depth -= 1
         except Exception as exc:
             LOGGER.error(
                 "url: '%s', %s" % (url, exc))
-
+        self.depth = 0  # when come back, reset
 
     def get_stats(self):
         return len(self.downloaded_urls), self.downloaded_audios_counter

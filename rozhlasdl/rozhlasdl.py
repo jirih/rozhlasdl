@@ -25,8 +25,10 @@ def create_parser():
                         dest="follow_next_pages", default=False, action='store_true')
     parser.add_argument('-m', '--max-next-pages', help='Maximal number of next pages to follow',
                         dest="max_next_pages", default=3, action='store')
-    parser.add_argument('-i', '--follow-image-links', help='Enable following image links.',
+    parser.add_argument('-i', '--follow-image-links', help='Enable following image links',
                         dest="follow_image_links", default=False, action='store_true')
+    parser.add_argument('--max-depth', help='Maximal number of list pages to dive in',
+                        dest="max_depth", default=2, action='store')
     parser.add_argument('-s', '--simulate-audio-download', help='Downloads of audio files will be faked',
                         dest="fake_download", default=False, action='store_true')
     parser.add_argument('-u', '--utf-8',
@@ -62,6 +64,7 @@ def main():
     follow_image_links = args.follow_image_links
     fake_download = args.fake_download
     max_next_pages = int(args.max_next_pages)
+    max_depth = int(args.max_depth)
     progress_bar_enabled = args.progress_bar_enabled
     log_file = args.log_file
     kindness = int(args.kindness)
@@ -80,7 +83,7 @@ def main():
                                      fake_download=fake_download, max_next_pages=max_next_pages,
                                      progress_bar_enabled=progress_bar_enabled, use_page_title=use_page_title,
                                      kindness=kindness, follow_image_links=follow_image_links,
-                                     subdomain_subdir_enabled=subdomain_subdir_enabled)
+                                     subdomain_subdir_enabled=subdomain_subdir_enabled, max_depth=max_depth)
 
     logger.debug("Download started.")
 

@@ -53,6 +53,7 @@ optional arguments:
                         Number of seconds to wait before a next download.
   --no-subdomain-subdir
                         Do not use subdomain subdir
+  --max-depth MAX_DEPTH Maximal number of list pages to dive in
   -v, --verbose         Verbose
 ```
 Given urls must be valid rozhlas.cz pages.
