@@ -98,7 +98,7 @@ class MainDownloader():
         serial_folder = join(folder, str_to_win_file_compatible(serial_name))
 
         for mp3_url, audio_title in mp3_urls_and_audio_titles:
-            self.download_mp3(audio_title, serial_folder, mp3_url)
+            self.download_audio_file(audio_title, serial_folder, mp3_url)
 
     def download_audio_muj_rozhlas_player(self, root, audio_div, folder):
         page_parser = MujRozhlasPlayerPageParser(root, audio_div)
@@ -119,7 +119,7 @@ class MainDownloader():
 
         for mp3_url, audio_title in mp3_urls_and_audio_titles:
             LOGGER.debug("%s: %s " % (audio_title, mp3_url))
-            self.download_mp3(audio_title, folder, mp3_url)
+            self.download_audio_file(audio_title, folder, mp3_url)
 
     def download_audio_article(self, root, audio_div, folder):
         page_parser = RozhlasAudioArticlePageParser(root, audio_div)
@@ -139,13 +139,13 @@ class MainDownloader():
             LOGGER.warning("%s: No audio file found." % audio_title)
             return
         else:
-            self.download_mp3(audio_title, folder, mp3_url)
+            self.download_audio_file(audio_title, folder, mp3_url)
 
         if page_parser.has_other_parts():
             mp3_urls_and_audio_titles_of_other_parts = page_parser.get_mp3_urls_and_audio_titles_of_other_parts()
             for mp3_url, audio_title in mp3_urls_and_audio_titles_of_other_parts:
                 LOGGER.debug("%s: %s " % (audio_title, mp3_url))
-                self.download_mp3(audio_title, folder, mp3_url)
+                self.download_audio_file(audio_title, folder, mp3_url)
 
     def download_player(self, block_track_player_div, folder):
         page_parser = RozhlasPlayerPageParser(block_track_player_div)
@@ -154,9 +154,9 @@ class MainDownloader():
         programme = page_parser.get_programme()
         mp3_url = page_parser.get_mp3_url()
 
-        self.download_mp3(audio_title, safe_path_join(folder, programme), mp3_url)
+        self.download_audio_file(audio_title, safe_path_join(folder, programme), mp3_url)
 
-    def download_mp3(self, audio_title, folder, mp3_url):
+    def download_audio_file(self, audio_title, folder, mp3_url):
         if mp3_url is None:
             raise RozhlasException("MP3 URL not given! Probably problem with parsing.")
         if audio_title is not None and mp3_url is not None:
@@ -168,6 +168,7 @@ class MainDownloader():
         if self.something_downloaded:
             # LOGGER.debug("Waiting %d seconds." % self.kindness)
             time.sleep(self.kindness)
+
         fd = FileDownloader(folder, progress_bar=MyProgressBar() if self.progress_bar_enabled else None,
                             no_duplicates=self.no_duplicates, fake_download=self.fake_download)
         not_skipped = fd.download(mp3_url, filename)

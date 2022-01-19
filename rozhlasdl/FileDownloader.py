@@ -6,6 +6,7 @@ from urllib.error import HTTPError, ContentTooShortError
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen, urlretrieve
 
+import youtube_dl
 from retry import retry
 
 from log.LoggerFactory import LoggerFactory
@@ -54,10 +55,8 @@ class FileDownloader:
             a = urlparse(url)
             name = os.path.basename(a.path)
         path = os.path.join(self.folder, name)
-
-        content_length = get_size_of_file_on_web(url)
-
-        if os.path.isfile(path):
+        if os.path.isfile(path) and not url.endswith(".mpd"):
+            content_length = get_size_of_file_on_web(url)
             if self.no_duplicates:
                 existing_file_length = os.path.getsize(path)
                 if content_length != existing_file_length:
@@ -77,11 +76,25 @@ class FileDownloader:
             else:
                 LOGGER.info("100% |########################################################################|")
         else:
-            self.url_download(path, url)
+            self.url_download_wrapped(path, url)
             if self.progress_bar is None:
                 LOGGER.info("Download of %s from %s done." % (path, url))
         return True
 
+    def url_download_wrapped(self, path, url):
+        if url.endswith(".mpd"):
+            LOGGER.info("Downloading stream.")
+            self.url_download_stream(path, url)
+        else:
+            self.url_download(path, url)
+
     @retry((HTTPError, ContentTooShortError), tries=3, delay=5, backoff=2)
     def url_download(self, path, url):
         urlretrieve(url, path, self.progress_bar)
+
+    def url_download_stream(self, path, url):
+        no_progress = self.progress_bar is None
+        ydl = youtube_dl.YoutubeDL({'outtmpl': path, "noprogress": no_progress, "retries": 3})
+        with ydl:
+            result = ydl.extract_info(url)
+            LOGGER.debug(result)

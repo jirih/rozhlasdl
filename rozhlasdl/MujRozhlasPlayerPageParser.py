@@ -1,5 +1,8 @@
 import json
 from qualifiedTags import H1
+from log.LoggerFactory import LoggerFactory
+
+LOGGER = LoggerFactory.get(__name__)
 
 
 class MujRozhlasPlayerPageParser:
@@ -21,7 +24,7 @@ class MujRozhlasPlayerPageParser:
             return title
 
     def is_copyright_expired(self):
-        return False # Unsupported at the moment.
+        return False  # Unsupported at the moment.
 
     def get_page_name(self):
         for h1 in self.root.iter(H1):
@@ -34,13 +37,22 @@ class MujRozhlasPlayerPageParser:
         for playlist_item in playlist:
             title = playlist_item["title"]
             audiolinks = playlist_item["audioLinks"]
-            urls = list(map(lambda x: x["url"], audiolinks))
-            is_multi_urls = len(urls) > 1
-            counter = 0
-            for url in urls:
-                if is_multi_urls:
-                    counter += 1
-                    urls_and_titles.append((url, "%s %03d" % (title, counter,)))
-                else:
-                    urls_and_titles.append((url, "%s" % title))
+            url = None
+            download_link_present = False
+            for audiolink in audiolinks:
+                if audiolink["linkType"] == "download":
+                    url = audiolink["url"]
+                    download_link_present = True
+                    break
+            if not download_link_present:
+                for audiolink in audiolinks:
+                    if audiolink["linkType"] == "ondemand" and audiolink["variant"] == "dash":
+                        url = audiolink["url"]
+                        download_link_present = True
+                        break
+            if not download_link_present:
+                LOGGER.warning("Link for %s from %s not found." % (title, self.get_page_name(),))
+                break
+
+            urls_and_titles.append((url, title))
         return urls_and_titles

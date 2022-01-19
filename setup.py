@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='rozhlasdl',
-    version='0.9.25',
+    version='0.9.26',
     url='https://github.com/jirih/rozhlas-dl',
     packages=find_packages(),
     license='GPLv3',
@@ -22,7 +22,7 @@ setup(
             'rozhlasdl = rozhlasdl.rozhlasdl:main'
         ]
     }, install_requires=[
-        'html5lib', 'progressbar', 'retry'
+        'html5lib', 'progressbar', 'retry', 'youtube_dl'
     ],
 
 )
