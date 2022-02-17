@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import contextlib
 import os
+import re
 from pathlib import Path
 from urllib.error import HTTPError, ContentTooShortError
 from urllib.parse import urlparse
@@ -13,7 +14,12 @@ from log.LoggerFactory import LoggerFactory
 from utils import makedirs
 
 LOGGER = LoggerFactory.get(__name__)
+cros3_url_regex = re.compile(
+    r'https://.*//(?P<uuid>\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b)\?uuid=.*',
+    re.IGNORECASE)
 
+CROS3_BASE_URL = 'https://croaod.cz/stream/'
+CROS3_URL_DASH_SUFFIX = '.m4a/manifest.mpd'
 
 def create_path_with_index(path, index):
     split = os.path.splitext(path)
@@ -55,6 +61,11 @@ class FileDownloader:
             a = urlparse(url)
             name = os.path.basename(a.path)
         path = os.path.join(self.folder, name)
+
+        cros3_match = cros3_url_regex.match(url)
+        if cros3_match is not None:
+            url = CROS3_BASE_URL + cros3_match.group('uuid') + CROS3_URL_DASH_SUFFIX
+
         if os.path.isfile(path) and not url.endswith(".mpd"):
             content_length = get_size_of_file_on_web(url)
             if self.no_duplicates:
