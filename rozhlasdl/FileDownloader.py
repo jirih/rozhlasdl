@@ -21,6 +21,7 @@ cros3_url_regex = re.compile(
 CROS3_BASE_URL = 'https://croaod.cz/stream/'
 CROS3_URL_DASH_SUFFIX = '.m4a/manifest.mpd'
 
+
 def create_path_with_index(path, index):
     split = os.path.splitext(path)
     return split[0] + " (%d)" % index + split[1]
@@ -72,8 +73,21 @@ class FileDownloader:
                 existing_file_length = os.path.getsize(path)
                 if content_length != existing_file_length:
                     LOGGER.warning(
-                        "File %s already exists but has different length. New version will be downloaded." % path)
-                    path = add_index_to_path(path, 1)
+                        "File %s already exists but has different length." % path)
+                    non_indexed_path = path
+                    index = 0
+                    while True:
+                        index += 1
+                        path = create_path_with_index(non_indexed_path, index)
+                        if os.path.isfile(path):
+                            existing_file_length = os.path.getsize(path)
+                            if content_length == existing_file_length:
+                                LOGGER.info("File %s already exists. Skipping." % path)
+                                return False
+                        else:
+                            LOGGER.warning(
+                                "New version of file %s will be downloaded, index %d." % (path, index))
+                            break
                 else:
                     LOGGER.info("File %s already exists. Skipping." % path)
                     return False
